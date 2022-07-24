@@ -2,13 +2,17 @@ import json
 from typing import Dict, List
 from enum import Enum
 from ..utils.parse_content import parse_content
-
+from ..utils.request import get
+from datetime import datetime
+from bs4 import BeautifulSoup
 
 class Status(Enum):
     ONGOING = 1
     COMPLETED = 2
     CANCELLED = 3
     HOLD = 4
+
+
 
 
 class Chapter:
@@ -39,6 +43,36 @@ class Author:
         return json.dumps({'url': self.url, 'author_img_url': self.author_img_url, 'name': self.name, 'books': self.books.to_json() if self.books != None else None}, indent=4)
 
 
+def get_chapters(url: str) -> List[Chapter]:
+    """
+    Args:
+        url (string): book url
+
+    Returns:
+        List[Chapter]: returns a list of Chapter objects
+
+        Chapter object has the following attributes:
+            url (string): chapter url
+            title (string): chapter title
+            content (list): list of chapter content
+    """
+    response = get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    main_url = "https://www.wattpad.com"
+
+    toc = soup.find(class_='table-of-contents')
+    lis = toc.find_all('li')
+    chapters = []
+    for li in lis:
+        a = li.find('a')
+        url = a.get('href')
+        if url.startswith('/'):
+            url = main_url + url
+        ch = Chapter(
+            url=url, title=a.get_text().strip().replace('\n', ' '))
+        chapters.append(ch)
+    return chapters
+
 class Book:
     """
     Book class
@@ -59,11 +93,11 @@ class Book:
 
     """
 
-    def __init__(self, url: str, title: str, author: Author, img_url: str, total_chapters: int, tags: List[str], description: str, published: str, reads: int = None, votes: int = None, status: Status = Status.ONGOING, isMature: bool = False, chapters: List[Chapter] = None) -> None:
+    def __init__(self, url: str, title: str,  img_url: str, total_chapters: int,description: str, author: Author=None, tags: List[str]=None,  published: str=None, reads: int = None, votes: int = None, status: Status = Status.ONGOING, isMature: bool = False, chapters: List[Chapter] = None) -> None:
         self.url = url
         self.title = title
         self.author = author
-        self.chapters = chapters
+        self._chapters = chapters
         self.img_url = img_url
         self.tags = tags
         self.status = status
@@ -74,6 +108,70 @@ class Book:
         self.votes = votes
         self.total_chapters = total_chapters
 
+    @property
+    def chapters(self) -> List[Chapter]:
+        if self._chapters is not None:
+            return self._chapters
+        else:
+            return get_chapters(self.url)
+
+
     def to_json(self) -> str:
         # withouth chapters
         return json.dumps({'url': self.url, 'title': self.title, 'author': self.author.to_json(), 'img_url': self.img_url, 'tags': self.tags, 'status': self.status.name, 'isMature': self.isMature, 'description': self.description, 'published': self.published, 'reads': self.reads, 'votes': self.votes, 'total_chapters': self.total_chapters}, indent=4)
+    
+
+    # from json
+    @classmethod
+    def from_json(cls, json_str: str) -> 'Book':
+        json_str = json.loads(json_str) if isinstance(json_str,str) else json_str
+        title = json_str['title']
+        url = json_str['url']
+        img_url = json_str['cover']
+        description = json_str['description']
+        author_name = json_str['user']['name']
+        author_url = f"https://www.wattpad.com/user/{author_name}"
+        author = Author(name=author_name, url=author_url)
+        tags = json_str['tags']
+        status = json_str['completed'] if json_str['completed'] else Status.ONGOING
+        isMature = json_str['mature']
+        published = json_str['lastPublishedPart']['createDate']
+        published = datetime.strptime(published, '%Y-%m-%d %H:%M:%S')
+        published = published.strftime('%d/%m/%Y')
+        reads = json_str['readCount']
+        votes = json_str['voteCount']
+        total_chapters = json_str['numParts']
+        return cls(url=url, title=title, img_url=img_url, description=description, author=author, tags=tags, status=status, isMature=isMature, published=published, reads=reads, votes=votes, total_chapters=total_chapters)
+
+#     {
+    #   "id": "80033537",
+    #   "title": "ROMEO [2] ⚡ harry potter ",
+    #   "description": "❝ 𝐇𝐄 𝐖𝐀𝐒 𝐒𝐋𝐄𝐄𝐏 𝐀𝐍𝐃 𝐒𝐇𝐄 𝐖𝐀𝐒 𝐖𝐀𝐊𝐄𝐅𝐔𝐋𝐍𝐄𝐒𝐒. 𝐓𝐇𝐄 𝐆𝐈𝐑𝐋 𝐖𝐈𝐓𝐇 𝐀 𝐒𝐎𝐔𝐋 𝐖𝐇𝐄𝐑𝐄 𝐑𝐎𝐒𝐄𝐒 𝐆𝐑𝐄𝐖, 𝐓𝐇𝐄 𝐁𝐎𝐘 𝐖𝐈𝐓𝐇 𝐀 𝐒𝐎𝐔𝐋 𝐃𝐄𝐒𝐓𝐈𝐍𝐄𝐃 𝐅𝐎𝐑 𝐂𝐀𝐋𝐀𝐌𝐈𝐓𝐘. \n\n𝐖 𝐇 𝐀 𝐓  𝐀  𝐏 𝐀 𝐈 𝐑  𝐓 𝐇 𝐄 𝐘  𝐖 𝐄 𝐑 𝐄. ❞\n\n[spin off to Caecus, a Harry Potter fanfiction- read once you reach PART III in caecus] [4/8/16 to 26/07/18]\n\n© Aug 2016- wattpad.com/sweetwines",
+    #   "user": {
+    #     "name": "sweetwines"
+    #   },
+    #   "completed": true,
+    #   "numParts": 42,
+    #   "lastPublishedPart": {
+    #     "createDate": "2020-12-20 13:13:29"
+    #   },
+    #   "voteCount": 3387,
+    #   "readCount": 114760,
+    #   "commentCount": 2677,
+    #   "cover": "https://img.wattpad.com/cover/80033537-256-k109399.jpg",
+    #   "mature": false,
+    #   "url": "https://www.wattpad.com/story/80033537-romeo-2-%E2%9A%A1-harry-potter",
+    #   "tags": [
+    #     "goldenera",
+    #     "harrypotter",
+    #     "hogwarts",
+    #     "hpau",
+    #     "hpromance",
+    #     "wattys2018"
+    #   ],
+    #   "isPaywalled": false,
+    #   "length": 354012,
+    #   "language": {
+    #     "id": 1
+    #   }
+    # },

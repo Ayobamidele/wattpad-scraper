@@ -1,18 +1,19 @@
+from typing import List
 from bs4 import BeautifulSoup
 from .models import Author, Book, Chapter, Status
 from .utils import get
+from urllib.parse import quote
+
 
 class Wattpad:
     def __init__(self) -> None:
         self.main_url = "https://www.wattpad.com"
 
-    
-    
     def get_book_by_url(self, url) -> Book:
         """
         Args:
             url (string): book url
-        
+
         Returns:
             Book: returns a Book object
 
@@ -33,23 +34,27 @@ class Wattpad:
 
         response = get(url)
         soup = BeautifulSoup(response.text, "html.parser")
-        
+
         # Get book stats
         stats = soup.find(class_='new-story-stats')
         lis = stats.find_all('li')
 
-        reads = lis[0].find(class_="sr-only").get_text().replace('Reads', '').replace(',', '').strip()
+        reads = lis[0].find(
+            class_="sr-only").get_text().replace('Reads', '').replace(',', '').strip()
         reads = int(reads)
 
-        votes = lis[1].find(class_="sr-only").get_text().replace('Votes', '').replace(',', '').strip()
+        votes = lis[1].find(
+            class_="sr-only").get_text().replace('Votes', '').replace(',', '').strip()
         votes = int(votes)
 
-        parts = lis[2].find(class_="sr-only").get_text().replace('Parts', '').strip()
+        parts = lis[2].find(
+            class_="sr-only").get_text().replace('Parts', '').strip()
         parts = int(parts)
 
         # class : story-badges
         badges = soup.find(class_='story-badges')
-        completed = badges.find(class_="tag-item").get_text().lower().startswith('com')
+        completed = badges.find(
+            class_="tag-item").get_text().lower().startswith('com')
         status = None
         if completed:
             status = Status.COMPLETED
@@ -60,7 +65,8 @@ class Wattpad:
         mature = badges.find(class_="mature") is not None
 
         # published sr-only > ex. Complete, First published Sep 25, 2018
-        published = badges.find(class_='sr-only').get_text().split('First published ')[1]
+        published = badges.find(
+            class_='sr-only').get_text().split('First published ')[1]
 
         # description class description-text
         description = soup.find(class_='description-text').get_text()
@@ -74,9 +80,10 @@ class Wattpad:
             url = a.get('href')
             if url.startswith('/'):
                 url = self.main_url + url
-            ch = Chapter(url=url, title=a.get_text().strip().replace('\n', ' '))
+            ch = Chapter(
+                url=url, title=a.get_text().strip().replace('\n', ' '))
             chapters.append(ch)
-        
+
         # Get Title class: "sr-only" > text (title)
         title = soup.find(class_='sr-only').get_text()
 
@@ -89,13 +96,14 @@ class Wattpad:
         author_url = a.get('href')
         if author_url.startswith('/'):
             author_url = self.main_url + author_url
-        author = Author(url=author_url, name=a.get_text(), author_img_url=img_url)
+        author = Author(url=author_url, name=a.get_text(),
+                        author_img_url=img_url)
 
         # Get Image class: "story-cover" > img > src
         book_img_url = soup.find(class_='story-cover').find('img').get('src')
         if book_img_url.startswith('/'):
             book_img_url = self.main_url + book_img_url
-        
+
         # Get Tags class: tag-items > li > a > text
         tags = []
         tag_items = soup.find(class_='tag-items')
@@ -106,19 +114,32 @@ class Wattpad:
 
         # Get Book object
         book = Book(url=url, title=title, author=author, img_url=book_img_url, description=description,
-                    published=published, isMature=mature, reads=reads, votes=votes, chapters=chapters,total_chapters=parts, tags=tags,status=status)
+                    published=published, isMature=mature, reads=reads, votes=votes, chapters=chapters, total_chapters=parts, tags=tags, status=status)
         return book
-    
 
-    
+    def search_book(self, query: str,limit:int=15) -> List[Book]:
+        """
+        Args:
+            query (string): search query
+
+        Returns:
+            List[Book]: returns a list of Book objects
+        """
+        parsed_query = quote(query)
+        url = f"https://www.wattpad.com/v4/search/stories?query={parsed_query}&fields=stories(id,title,voteCount,readCount,commentCount,description,completed,mature,cover,url,isPaywalled,length,language(id),user(name),numParts,lastPublishedPart(createDate),promoted,sponsor(name,avatar),tags,tracking(clickUrl,impressionUrl,thirdParty(impressionUrls,clickUrls)),contest(endDate,ctaLabel,ctaURL)),chapters(url),total,tags,nexturl&limit={limit}&mature=true&offset=0"
+        response = get(url)
+        json_data = response.json()
+        books = []
+        for book in json_data['stories']:
+            b = Book.from_json(book)
+            books.append(b)
+        return books
+
+
+
+        
+
 
 # if __name__ == "__main__":
 #     wattped = Wattpad()
-#     book_url = "https://www.wattpad.com/story/162756571-bending-the-rules-the-rules-1"
-#     book = wattped.get_book_by_url(book_url)
-#     print(book.title)
-#     print(book.author.name, book.author.url)
-#     print(book.description)
-
-
-    
+#     wattped.search_book('harry potter')
