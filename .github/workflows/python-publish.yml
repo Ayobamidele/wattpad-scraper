@@ -22,8 +22,7 @@ jobs:
     - name: Build package
       run: python -m build
       run: ls
-
-    - name: Upload Artifact
+      
     - uses: actions/upload-artifact@v1
       with:
         name: 'python-package'
