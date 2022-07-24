@@ -31,13 +31,13 @@ jobs:
         name: 'python-package'
         path: dist
     
-    # - name: Create a tags
-    #   run: |
-    #     git config --global user.email hossain0338@gmail.com
-    #     git config --global user.name shhossain
-    #     git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/wattpad-scraper.git
-    #     git tag -a "v${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
-    #     git push origin --tags
+    - name: Create a tags
+      run: |
+        git config --global user.email hossain0338@gmail.com
+        git config --global user.name shhossain
+        git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/wattpad-scraper.git
+        git tag -a "v${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
+        git push origin --tags
 
     - name: Create Release
       id: create_release
@@ -45,24 +45,33 @@ jobs:
       with:
         tag_name: "v${{ env.VERSION }}"
         release_name: Release v${{ env.VERSION }}
-        body_path: CHANGELOG.md
+        body_path: RECENTCHANGELOG.md
         draft: false
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.COMMIT_SECRET }}
     
-    - name: upload release
+    - name: upload release whl
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/*
-        asset_name: python-package
-      
+        asset_path: dist/wattpad_scraper-{{ env.VERSION }}-py3-none-any.whl
+        asset_name: wattpad_scraper-{{ env.VERSION }}-py3-none-any.whl
+        asset_content_type: application/x-wheel+zip
+    
+    - name: upload release tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/wattpad-scraper-{{ env.VERSION }}.tar.gz
+        asset_name: wattpad-scraper-{{ env.VERSION }}.tar.gz
+        asset_content_type: application/x-gzip
 
-
-    - name: Publish a Python distribution to PyPI
+    - name: Publish to PYPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
