@@ -1,5 +1,3 @@
-import json
-import cloudscraper
 from bs4 import BeautifulSoup
 from models import Author, Book, Chapter, Status
 from utils import get
