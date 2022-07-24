@@ -92,9 +92,8 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
-      if: ${{ steps.check_latest_version.outputs }} == "200"
-      run: |
-        echo "Version ${{ env.VERSION }} already exists on PyPI"
+    
+      
 
       
     
