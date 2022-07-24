@@ -41,6 +41,8 @@ jobs:
         body_path: CHANGELOG.md
         draft: false
         prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.commit_secret }}
     
     - name: upload release
       uses: actions/upload-release-asset@v1
