@@ -57,7 +57,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/wattpad_scraper-{{ env.VERSION }}-py3-none-any.whl
+        asset_path: dist/*.whl
         asset_name: wattpad_scraper-{{ env.VERSION }}-py3-none-any.whl
         asset_content_type: application/x-wheel+zip
     
@@ -67,7 +67,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/wattpad-scraper-{{ env.VERSION }}.tar.gz
+        asset_path: dist/*.tar.gz
         asset_name: wattpad-scraper-{{ env.VERSION }}.tar.gz
         asset_content_type: application/x-gzip
 
