@@ -6,6 +6,9 @@ on:
 permissions:
   contents: read
 
+env:
+  VERSION: 0.0.4
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -29,13 +32,21 @@ jobs:
       with:
         name: 'python-package'
         path: dist
+    
+    - name: Create a tags
+    - run: |
+        git config --global user.email hossain0338@gmail.com
+        git config --global user.name shhossain
+        git remote set-url origin https://${{secrets.commit_secret}}@github.com/shhossain/electricbillsfullapp.git
+        git tag -a "v${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
+        git push origin --tags
 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1 # This token is provided by Actions, you do not need to create your own token
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: "v${{ env.VERSION }}"
+        release_name: Release "v${{ env.VERSION }}"
         body_path: CHANGELOG.md
         draft: false
         prerelease: false
