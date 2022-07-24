@@ -31,20 +31,20 @@ jobs:
         name: 'python-package'
         path: dist
     
-    - name: Create a tags
-      run: |
-        git config --global user.email hossain0338@gmail.com
-        git config --global user.name shhossain
-        git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/wattpad-scraper.git
-        git tag -a "v${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
-        git push origin --tags
+    # - name: Create a tags
+    #   run: |
+    #     git config --global user.email hossain0338@gmail.com
+    #     git config --global user.name shhossain
+    #     git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/wattpad-scraper.git
+    #     git tag -a "v${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
+    #     git push origin --tags
 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1 # This token is provided by Actions, you do not need to create your own token
       with:
         tag_name: "v${{ env.VERSION }}"
-        release_name: Release "v${{ env.VERSION }}"
+        release_name: Release v${{ env.VERSION }}
         body_path: CHANGELOG.md
         draft: false
         prerelease: false
