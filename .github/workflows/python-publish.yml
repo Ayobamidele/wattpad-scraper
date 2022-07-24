@@ -86,12 +86,17 @@ jobs:
     
 
       
-    - if: ${{ steps.check_latest_version.outputs }} == "404"
     - name: Publish to PYPI
+      if: ${{ steps.check_latest_version.outputs }} == "404"
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+      if: ${{ steps.check_latest_version.outputs }} == "200"
+      run: |
+        echo "Version ${{ env.VERSION }} already exists on PyPI"
+
+      
     
     
 
