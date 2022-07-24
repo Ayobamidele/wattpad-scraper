@@ -23,7 +23,14 @@ jobs:
     - name: Build package
       run: |
         python -m build
-        ls
+    
+    - name: Show Package
+      run: |
+        pwd
+        ls -la
+        cd dist
+        pwd
+        ls -la
 
 
     - uses: actions/upload-artifact@v1
@@ -56,8 +63,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
+      #  wattpad-scraper-0.0.4.tar.gz and wattpad_scraper-0.0.4-py3-none-any.whl
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/*.whl
+        asset_path: dist/wattpad-scraper-{{ env.VERSION }}-py3-none-any.whl
         asset_name: wattpad_scraper-{{ env.VERSION }}-py3-none-any.whl
         asset_content_type: application/x-wheel+zip
     
@@ -67,7 +75,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/*.tar.gz
+        asset_path: dist/wattpad-scraper-{{ env.VERSION }}.tar.gz
         asset_name: wattpad-scraper-{{ env.VERSION }}.tar.gz
         asset_content_type: application/x-gzip
 
