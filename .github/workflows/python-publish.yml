@@ -20,9 +20,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install build
     - name: Build package
-      run: python -m build
-      run: ls
-      
+      run: |
+        python -m build
+        ls
+
+
     - uses: actions/upload-artifact@v1
       with:
         name: 'python-package'
