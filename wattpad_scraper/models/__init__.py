@@ -1,7 +1,7 @@
 import json
 from typing import Dict, List
 from enum import Enum
-from utils.parse_content import parse_content
+from ..utils.parse_content import parse_content
 
 
 class Status(Enum):

@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-from models import Author, Book, Chapter, Status
-from utils import get
+from .models import Author, Book, Chapter, Status
+from .utils import get
 
 class Wattpad:
     def __init__(self) -> None:
