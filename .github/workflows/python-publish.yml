@@ -66,7 +66,7 @@ jobs:
       #  wattpad-scraper-0.0.4.tar.gz and wattpad_scraper-0.0.4-py3-none-any.whl
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad_scraper-0.0.4-py3-none-any.whl
-        asset_name: wattpad_scraper-{{ env.VERSION }}-py3-none-any.whl
+        asset_name: "wattpad_scraper-{{ env.VERSION }}-py3-none-any.whl"
         asset_content_type: application/x-wheel+zip
     
     - name: upload release tar.gz
@@ -76,13 +76,22 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad-scraper-0.0.4.tar.gz
-        asset_name: wattpad-scraper-{{ env.VERSION }}.tar.gz
+        asset_name: "wattpad-scraper-{{ env.VERSION }}.tar.gz"
         asset_content_type: application/x-gzip
+    
+    - name: Check latest version
+      id: check_latest_version
+      run: |
+        curl -s -o /dev/null -I -w "%{http_code}" "https://pypi.org/pypi/wattpad-scraper/{{ env.VERSION }}"
+    
 
+      
+    - if: ${{ steps.check_latest_version.outputs }} == "404"
     - name: Publish to PYPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+    
     
 
