@@ -83,21 +83,30 @@ jobs:
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        VERSION: ${{ env.VERSION }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad_scraper-${{needs.createTag.outputs.onlyVersion}}-py3-none-any.whl
-        asset_name: "wattpad_scraper-${{needs.createTag.outputs.onlyVersion}}-py3-none-any.whl"
+        asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad_scraper-0.0.4-py3-none-any.whl
+        asset_name: "wattpad_scraper-$VERSION-py3-none-any.whl"
         asset_content_type: application/x-wheel+zip
     
     - name: upload release tar.gz
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        VERSION: ${{ env.VERSION }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
+<<<<<<< HEAD
         asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad-scraper-${{needs.createTag.outputs.onlyVersion}}.tar.gz
         asset_name: "wattpad-scraper-${{needs.createTag.outputs.onlyVersion}}.tar.gz"
         asset_content_type: application/x-gzip 
+=======
+        asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad-scraper-0.0.4.tar.gz
+        asset_name: "wattpad-scraper-$VERSION.tar.gz"
+        asset_content_type: application/x-gzip
+    
+>>>>>>> 37bd51f27f8c010efbe25aff9cacc7b619d4b890
 
     - name: Publish to PYPI
       if: ${{ steps.check_latest_version.outputs }} == "404"
