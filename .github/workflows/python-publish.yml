@@ -49,6 +49,11 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: '3.x'
+    - name: Chnage setup.py
+      run: |
+        python -c "import re;pyfile=open('setup.py','r').read();pattern=r'''version=\'(.*?)\'''';version=re.search(pattern,pyfile).group(1);replaceVersion='${{steps.createTag.outputs.version}}';newpyfile=pyfile.replace(version,replaceVersion.replace('v',''));open('setup.py','w').write(newpyfile)"
+    - name: Print setup.py
+      run: cat setup.py
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -75,7 +80,7 @@ jobs:
       uses: actions/create-release@v1 # This token is provided by Actions, you do not need to create your own token
       with:
         tag_name: "${{needs.createTag.outputs.version}}"
-        release_name: Release "${{needs.createTag.outputs.version}}"
+        release_name: Release ${{needs.createTag.outputs.version}}
         body_path: RECENTCHANGELOG.md
         draft: false
         prerelease: false
