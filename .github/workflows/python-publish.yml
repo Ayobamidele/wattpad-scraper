@@ -4,12 +4,42 @@ on:
   push
 
 
-env:
-  VERSION: 0.0.4
-
 jobs:
-  deploy:
+  createTag:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+      onlyVersion: ${{ steps.tag.outputs.onlyVersion }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    
+    - name: Create tag
+      id: tag
+      run: |
+        git config --global user.email hossain0338@gmail.com
+        git config --global user.name shhossain
+        git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/wattpad-scraper.git
+        git fetch --tags --all
+        previous_version=$(git tag -l v[0-9].* | tail -n1)
+        echo "previous_version: $previous_version"
+        new_version=$(python -c "a = '$previous_version'; b = int(a.split('.')[-1]) if a.split('.')[-1] else 0; c = b + 1; d = '.'.join(a.split('.')[0:-1] + [str(c)]) if c != 1 else '0.0.1'; d = d if 'v' in d else 'v' + d; print(d)")
+        echo "new_version: $new_version"
+        git tag -a $new_version -m "Version $new_version"
+        git push origin $new_version
+        python -c "import re;pyfile=open('setup.py','r').read();pattern=r'''version='(.*?)''';version=re.search(pattern,pyfile).group(1);replaceVersion='$new_version';newpyfile=pyfile.replace(version,replaceVersion.replace('v',''));open('setup.py','w').write(newpyfile)"
+        onlyVersion=$(echo $new_version | sed 's/v//')
+        echo "::set-output name=version::$new_version"
+        echo "::set-output name=onlyVersion::$onlyVersion"
+        
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [createTag]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -32,26 +62,17 @@ jobs:
         pwd
         ls -la
 
-
     - uses: actions/upload-artifact@v1
       with:
         name: 'python-package'
         path: dist
-    
-    - name: Create a tags
-      run: |
-        git config --global user.email hossain0338@gmail.com
-        git config --global user.name shhossain
-        git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/wattpad-scraper.git
-        git tag -a "v${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
-        git push origin --tags
 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1 # This token is provided by Actions, you do not need to create your own token
       with:
-        tag_name: "v${{ env.VERSION }}"
-        release_name: Release v${{ env.VERSION }}
+        tag_name: "${{needs.createTag.outputs.version}}"
+        release_name: Release "${{needs.createTag.outputs.version}}"
         body_path: RECENTCHANGELOG.md
         draft: false
         prerelease: false
@@ -63,10 +84,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-      #  wattpad-scraper-0.0.4.tar.gz and wattpad_scraper-0.0.4-py3-none-any.whl
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad_scraper-0.0.4-py3-none-any.whl
-        asset_name: "wattpad_scraper-{{ env.VERSION }}-py3-none-any.whl"
+        asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad_scraper-${{needs.createTag.outputs.onlyVersion}}-py3-none-any.whl
+        asset_name: "wattpad_scraper-${{needs.createTag.outputs.onlyVersion}}-py3-none-any.whl"
         asset_content_type: application/x-wheel+zip
     
     - name: upload release tar.gz
@@ -75,17 +95,10 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad-scraper-0.0.4.tar.gz
-        asset_name: "wattpad-scraper-{{ env.VERSION }}.tar.gz"
-        asset_content_type: application/x-gzip
-    
-    - name: Check latest version
-      id: check_latest_version
-      run: |
-        curl -s -o /dev/null -I -w "%{http_code}" "https://pypi.org/pypi/wattpad-scraper/{{ env.VERSION }}"
-    
+        asset_path: /home/runner/work/wattpad-scraper/wattpad-scraper/dist/wattpad-scraper-${{needs.createTag.outputs.onlyVersion}}.tar.gz
+        asset_name: "wattpad-scraper-${{needs.createTag.outputs.onlyVersion}}.tar.gz"
+        asset_content_type: application/x-gzip 
 
-      
     - name: Publish to PYPI
       if: ${{ steps.check_latest_version.outputs }} == "404"
       uses: pypa/gh-action-pypi-publish@release/v1
