@@ -32,6 +32,9 @@ jobs:
         git tag -a $new_version -m "Version $new_version"
         git push origin $new_version
         python -c "import re;pyfile=open('setup.py','r').read();pattern=r'''version='(.*?)''';version=re.search(pattern,pyfile).group(1);replaceVersion='$new_version';newpyfile=pyfile.replace(version,replaceVersion.replace('v',''));open('setup.py','w').write(newpyfile)"
+        git add setup.py
+        git commit -m "Version $new_version"
+        git push origin main
         onlyVersion=$(echo $new_version | sed 's/v//')
         echo "::set-output name=version::$new_version"
         echo "::set-output name=onlyVersion::$onlyVersion"
