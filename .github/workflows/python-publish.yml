@@ -49,9 +49,6 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: '3.x'
-    - name: Chnage setup.py
-      run: |
-        python -c "import re;pyfile=open('setup.py','r').read();pattern=r'''version=\'(.*?)\'''';version=re.search(pattern,pyfile).group(1);replaceVersion='${{steps.createTag.outputs.version}}';newpyfile=pyfile.replace(version,replaceVersion.replace('v',''));open('setup.py','w').write(newpyfile)"
     - name: Print setup.py
       run: cat setup.py
     - name: Install dependencies
