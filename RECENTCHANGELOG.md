@@ -1,4 +1,6 @@
-## [0.0.4] - Added Search Books
+## [0.0.7] 
+Added Definition for Books, Authors, and Chapters
 
-### Major Changes
-- Added search books
+### Features
+- Search books
+- Get book by url
