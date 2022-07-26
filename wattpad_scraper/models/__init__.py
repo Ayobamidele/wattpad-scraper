@@ -27,9 +27,26 @@ class Chapter:
 
     @property
     def content(self) -> List[str]:
+        """
+        Returns the content of the chapter. Will be parsed if not already parsed.
+        """
         if self._content is None:
             self._content =  parse_content(self.url)
         return self._content
+    
+    def __str__(self) -> str:
+        return f"Chapter(url={self.url}, title={self.title})"
+    
+    def __repr__(self) -> str:
+        return self.__str__()
+    
+    def __eq__(self, other) -> bool:
+        return self.url == other.url
+    
+    def __dir__(self) -> List[str]:
+        return ['url', 'title', 'content']
+        
+
 
 
 class Author:
@@ -37,11 +54,24 @@ class Author:
         self.url = url
         self.author_img_url = author_img_url
         self.name = name
-        self.books = books
+        self.books = books if books is not None else []
 
     def to_json(self) -> str:
         return json.dumps({'url': self.url, 'author_img_url': self.author_img_url, 'name': self.name, 'books': self.books.to_json() if self.books != None else None}, indent=4)
 
+    def __str__(self) -> str:
+        return f'Author(name={self.name}, url={self.url}'
+    
+    def __repr__(self) -> str:
+        return self.__str__()
+    
+    def __eq__(self, __o: object) -> bool:
+        if isinstance(__o, Author):
+            return self.url == __o.url
+        return False
+    
+    def __len__(self) -> int:
+        return len(self.books)
 
 def get_chapters(url: str) -> List[Chapter]:
     """
@@ -110,16 +140,31 @@ class Book:
 
     @property
     def chapters(self) -> List[Chapter]:
-        if self._chapters is not None:
-            return self._chapters
-        else:
-            return get_chapters(self.url)
+        if self._chapters is None:
+            self._chapters =  get_chapters(self.url)
+        return self._chapters
 
 
     def to_json(self) -> str:
         # withouth chapters
         return json.dumps({'url': self.url, 'title': self.title, 'author': self.author.to_json(), 'img_url': self.img_url, 'tags': self.tags, 'status': self.status.name, 'isMature': self.isMature, 'description': self.description, 'published': self.published, 'reads': self.reads, 'votes': self.votes, 'total_chapters': self.total_chapters}, indent=4)
     
+    def __str__(self) -> str:
+        return f"Book(title={self.title}, author={self.author.name}, status={self.status.name}, total_chapters={self.total_chapters})"
+    
+    def __repr__(self) -> str:
+        return self.__str__()
+    
+    def __eq__(self, other) -> bool:
+        return self.url == other.url
+    
+    # len
+    def __len__(self) -> int:
+        return self.total_chapters
+    
+    def __dir__(self) -> List[str]:
+        return ['url', 'title', 'author', 'img_url', 'tags', 'status', 'isMature', 'description', 'published', 'reads', 'votes', 'total_chapters','chapters','to_json']
+
 
     # from json
     @classmethod
@@ -142,6 +187,8 @@ class Book:
         votes = json_str['voteCount']
         total_chapters = json_str['numParts']
         return cls(url=url, title=title, img_url=img_url, description=description, author=author, tags=tags, status=status, isMature=isMature, published=published, reads=reads, votes=votes, total_chapters=total_chapters)
+
+
 
 #     {
     #   "id": "80033537",
