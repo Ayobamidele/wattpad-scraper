@@ -21,3 +21,10 @@ Added Definition for Books, Authors, and Chapters
 ### Features
 - Search books
 - Get book by url
+
+## [0.0.8] 
+Bug Fixes
+
+### Features
+- Search books
+- Get book by url

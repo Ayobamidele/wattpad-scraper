@@ -1,5 +1,5 @@
-## [0.0.7] 
-Added Definition for Books, Authors, and Chapters
+## [0.0.8] 
+Bug Fixes
 
 ### Features
 - Search books

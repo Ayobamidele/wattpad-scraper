@@ -60,7 +60,7 @@ class Author:
         return json.dumps({'url': self.url, 'author_img_url': self.author_img_url, 'name': self.name, 'books': self.books.to_json() if self.books != None else None}, indent=4)
 
     def __str__(self) -> str:
-        return f'Author(name={self.name}, url={self.url}'
+        return f'Author(name={self.name}, url={self.url})'
     
     def __repr__(self) -> str:
         return self.__str__()
@@ -150,7 +150,7 @@ class Book:
         return json.dumps({'url': self.url, 'title': self.title, 'author': self.author.to_json(), 'img_url': self.img_url, 'tags': self.tags, 'status': self.status.name, 'isMature': self.isMature, 'description': self.description, 'published': self.published, 'reads': self.reads, 'votes': self.votes, 'total_chapters': self.total_chapters}, indent=4)
     
     def __str__(self) -> str:
-        return f"Book(title={self.title}, author={self.author.name}, status={self.status.name}, total_chapters={self.total_chapters})"
+        return f"Book(title={self.title}, url={self.url}, status={self.status.name}, total_chapters={self.total_chapters})"
     
     def __repr__(self) -> str:
         return self.__str__()
@@ -178,7 +178,7 @@ class Book:
         author_url = f"https://www.wattpad.com/user/{author_name}"
         author = Author(name=author_name, url=author_url)
         tags = json_str['tags']
-        status = json_str['completed'] if json_str['completed'] else Status.ONGOING
+        status = Status.COMPLETED if json_str['completed'] else Status.ONGOING
         isMature = json_str['mature']
         published = json_str['lastPublishedPart']['createDate']
         published = datetime.strptime(published, '%Y-%m-%d %H:%M:%S')
@@ -187,8 +187,6 @@ class Book:
         votes = json_str['voteCount']
         total_chapters = json_str['numParts']
         return cls(url=url, title=title, img_url=img_url, description=description, author=author, tags=tags, status=status, isMature=isMature, published=published, reads=reads, votes=votes, total_chapters=total_chapters)
-
-
 
 #     {
     #   "id": "80033537",
