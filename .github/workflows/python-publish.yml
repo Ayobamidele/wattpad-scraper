@@ -108,7 +108,6 @@ jobs:
         asset_content_type: application/x-gzip 
 
     - name: Publish to PYPI
-      if: ${{ steps.check_latest_version.outputs }} == "404"
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
