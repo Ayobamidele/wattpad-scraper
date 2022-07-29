@@ -1,5 +1,4 @@
 import pytest
-
 from wattpad_scraper import Wattpad
 
 EXAMPLE_URL = "https://www.wattpad.com/story/48217861-ruins-harry-potter-1"
