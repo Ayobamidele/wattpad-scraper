@@ -1,5 +1,10 @@
 from setuptools import setup, find_packages
 
+# requerments.txt
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
+
 classifiers = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -20,8 +25,5 @@ setup(
     license='MIT',
     classifiers=classifiers,
     packages=find_packages(),
-    install_requires=[
-        'cloudscraper',
-        'bs4',
-    ]
+    install_requires=requirements,
 )
