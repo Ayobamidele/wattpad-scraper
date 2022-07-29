@@ -1,7 +1,12 @@
 from setuptools import setup, find_packages
+import os
 
-# requerments.txt
-with open('requirements.txt') as f:
+# requerments.txt path
+req_file = 'requerments.txt'
+if os.name != 'nt':
+    req_file = '/home/runner/work/wattpad-scraper/wattpad-scraper/requerments.txt'
+
+with open(req_file) as f:
     requirements = f.read().splitlines()
 
 
