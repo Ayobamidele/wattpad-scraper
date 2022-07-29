@@ -132,11 +132,15 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
+      - uses: actions/checkout@v3
       - uses: technote-space/workflow-conclusion-action@v2
       - name: Check Job Status status and fail if they are red
         if: env.WORKFLOW_CONCLUSION == 'failure'
         # delete the created tag
         run: |
+          git config --global user.email hossain0338@gmail.com
+          git config --global user.name shhossain
+          git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/wattpad-scraper.git
           git tag -d ${{ needs.createTag.outputs.version }}
           git push origin :refs/tags/${{ needs.createTag.outputs.version }}
           git push origin main
