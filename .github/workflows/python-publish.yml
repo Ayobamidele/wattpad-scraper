@@ -142,8 +142,6 @@ jobs:
           git config --global user.name shhossain
           git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/wattpad-scraper.git
           git tag -d ${{ needs.createTag.outputs.version }}
-          git push origin :refs/tags/${{ needs.createTag.outputs.version }}
-          git push origin main
-          git push origin --tags
+          git push --delete origin ${{ needs.createTag.outputs.version }}
       
     
