@@ -1,4 +1,4 @@
-import unittest
+import pytest
 
 from wattpad_scraper import Wattpad
 
@@ -22,5 +22,5 @@ class TestWattpadDownloader:
     assert book.author.name == "haIfblood"
 
 if __name__ == "__main__":
-  unittest.main()
+  pytest.main()
   
