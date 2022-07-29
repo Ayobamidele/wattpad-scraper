@@ -4,6 +4,9 @@ import os
 # check operating system is linux
 if os.name == 'posix':
   os.chdir('..')
+  path = os.getcwd()
+  import sys
+  sys.path.append(path)
 
 from wattpad_scraper import Wattpad
 
