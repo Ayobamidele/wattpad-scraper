@@ -1,20 +1,23 @@
 from typing import List
-from .request import get
+from wattpad_scraper.utils.request import get
 from bs4 import BeautifulSoup
 
-def chapter_soups(url : str, page: int=1, prev_soups:List[BeautifulSoup]=[]) -> BeautifulSoup:
-    res = get(url + '/page/' + str(page))
-    soup = BeautifulSoup(res.text, "html.parser")
-    prev_soups.append(soup)
 
-    # check if more content is available class on-load-more-page
-    more_content = soup.find(class_='on-load-more-page')
-    # print('page: ' + str(page), more_content != None)
-    if more_content is not None:
-        return chapter_soups(url, page+1, prev_soups)
-    else:
-        return prev_soups
-
+def chapter_soups(url : str) -> BeautifulSoup:
+    page = 1
+    soups = []
+    while 1:
+        res = get(url + '/page/' + str(page))
+        soup = BeautifulSoup(res.text, "html.parser")
+        next_part = soup.find("div",{"class":["next-up","next-part","orange"]})
+        next_part = "next-up next-part orange hidden" in str(next_part)
+        soups.append(soup)
+        if not next_part:
+            break
+        page += 1
+    return soups
+    
+    
 def parse_content(url : str) -> List[str]:
     """parse wattpad chapters
 
@@ -42,4 +45,3 @@ def parse_content(url : str) -> List[str]:
                 # if p tag don't have img tag, get text
                 contents.append(p.get_text())
     return contents
-
