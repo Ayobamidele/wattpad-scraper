@@ -12,9 +12,9 @@ def chapter_soups(url : str) -> BeautifulSoup:
         next_part = soup.find("div",{"class":["next-up","next-part","orange"]})
         next_part = "next-up next-part orange hidden" in str(next_part)
         soups.append(soup)
+        page += 1
         if not next_part:
             break
-        page += 1
     return soups
     
     
