@@ -1,5 +1,5 @@
-## [0.0.8] 
-Bug Fixes
+## [0.0.18]
+Added book chapters content fetching for faster performance
 
 ### Features
 - Search books
