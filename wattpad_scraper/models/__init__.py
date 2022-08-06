@@ -1,10 +1,11 @@
 import json
 from typing import Dict, List
 from enum import Enum
-from ..utils.parse_content import parse_content
-from ..utils.request import get
+from wattpad_scraper.utils.parse_content import parse_content
+from wattpad_scraper.utils.request import get
 from datetime import datetime
 from bs4 import BeautifulSoup
+import threading
 
 class Status(Enum):
     ONGOING = 1
@@ -16,10 +17,12 @@ class Status(Enum):
 
 
 class Chapter:
-    def __init__(self, url, title=None, content=None) -> None:
+    def __init__(self, url:str, title:str=None, content=None,chapter_number:int=0) -> None:
         self.url = url
         self.title = title
         self._content = content
+        self.number = chapter_number
+        
 
     # to json
     def to_json(self) -> Dict[str, str]:
@@ -45,6 +48,12 @@ class Chapter:
     
     def __dir__(self) -> List[str]:
         return ['url', 'title', 'content']
+    
+    def __len__(self) -> int:
+        total_len = 0
+        for content in self.content:
+            total_len += len(content)
+        return total_len
         
 
 
@@ -57,7 +66,7 @@ class Author:
         self.books = books if books is not None else []
 
     def to_json(self) -> str:
-        return json.dumps({'url': self.url, 'author_img_url': self.author_img_url, 'name': self.name, 'books': self.books.to_json() if self.books != None else None}, indent=4)
+        return json.dumps({'url': self.url, 'author_img_url': self.author_img_url, 'name': self.name, 'books': self.books if self.books != None else None}, indent=4)
 
     def __str__(self) -> str:
         return f'Author(name={self.name}, url={self.url})'
@@ -93,14 +102,15 @@ def get_chapters(url: str) -> List[Chapter]:
     toc = soup.find(class_='table-of-contents')
     lis = toc.find_all('li')
     chapters = []
-    for li in lis:
+    for n,li in enumerate(lis):
         a = li.find('a')
         url = a.get('href')
         if url.startswith('/'):
             url = main_url + url
         ch = Chapter(
-            url=url, title=a.get_text().strip().replace('\n', ' '))
+            url=url, title=a.get_text().strip().replace('\n', ' '), chapter_number=n)
         chapters.append(ch)
+        n += 1
     return chapters
 
 class Book:
@@ -137,12 +147,35 @@ class Book:
         self.reads = reads
         self.votes = votes
         self.total_chapters = total_chapters
+        self._chapters_with_content:List[Chapter] = []
 
     @property
     def chapters(self) -> List[Chapter]:
         if self._chapters is None:
             self._chapters =  get_chapters(self.url)
         return self._chapters
+
+    @property
+    def chapters_with_content(self) -> List[Chapter]:
+        if not self._chapters_with_content:
+            threads = []
+            for chapter in self.chapters:
+                t = threading.Thread(target=self.__chapter_content, args=(chapter,))
+                threads.append(t)
+                t.start()
+            for t in threads:
+                t.join()
+        
+        # sort by chapter number
+        self._chapters_with_content.sort(key=lambda x: x.number)
+        return self._chapters_with_content
+
+
+
+    def __chapter_content(self, chapter: Chapter) -> List[str]:
+        chapter.content
+        self._chapters_with_content.append(chapter)
+        return chapter.content
 
 
     def to_json(self) -> str:

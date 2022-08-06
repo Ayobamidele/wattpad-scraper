@@ -75,13 +75,13 @@ class Wattpad:
         toc = soup.find(class_='table-of-contents')
         lis = toc.find_all('li')
         chapters = []
-        for li in lis:
+        for n,li in enumerate(lis):
             a = li.find('a')
             url = a.get('href')
             if url.startswith('/'):
                 url = self.main_url + url
             ch = Chapter(
-                url=url, title=a.get_text().strip().replace('\n', ' '))
+                url=url, title=a.get_text().strip().replace('\n', ' '), chapter_number=n+1)
             chapters.append(ch)
 
         # Get Title class: "sr-only" > text (title)
