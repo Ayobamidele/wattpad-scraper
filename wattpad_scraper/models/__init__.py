@@ -3,6 +3,7 @@ from typing import Dict, List
 from enum import Enum
 from wattpad_scraper.utils.parse_content import parse_content
 from wattpad_scraper.utils.request import get
+from wattpad_scraper.utils.convert_to_epub import create_epub
 from datetime import datetime
 from bs4 import BeautifulSoup
 import threading
@@ -14,7 +15,9 @@ class Status(Enum):
     HOLD = 4
 
 
-
+def dprint(msg:str, verbose:bool=False):
+    if verbose:
+        print(msg)
 
 class Chapter:
     def __init__(self, url:str, title:str=None, content=None,chapter_number:int=0) -> None:
@@ -54,6 +57,22 @@ class Chapter:
         for content in self.content:
             total_len += len(content)
         return total_len
+    
+    def __hash__(self) -> str:
+        return hash(self.url)
+    
+    def __lt__(self, other) -> bool:
+        return self.number < other.number
+    
+    def __le__(self, other) -> bool:
+        return self.number <= other.number
+    
+    def __gt__(self, other) -> bool:
+        return self.number > other.number
+    
+    def __ge__(self, other) -> bool:
+        return self.number >= other.number
+        
         
 
 
@@ -170,13 +189,49 @@ class Book:
         self._chapters_with_content.sort(key=lambda x: x.number)
         return self._chapters_with_content
 
+    def chapters_with_content_per_thread(self,per_thread:int=10,verbose=False) -> List[Chapter]:
+        threads = []
+        total_main_threads = int(self.total_chapters/per_thread)
+        parsed_chapters = []
+        for i in range(total_main_threads):
+            for chapter in self.chapters[per_thread*i:per_thread*(i+1)]:
+                dprint(f"Getting content for chapter {chapter.number}. {chapter.title}",verbose)
+                t = threading.Thread(target=self.__chapter_content, args=(chapter,))
+                parsed_chapters.append(chapter)
+                threads.append(t)
+                t.start()
+            for t in threads:
+                t.join()
+            threads = []
+        
+        # remaining chapters parsed chapters - self.chapters with set
+        remaining_chapters = set(self.chapters) - set(parsed_chapters)
+        for chapter in remaining_chapters:
+            dprint(f"Getting content for chapter {chapter.number}. {chapter.title}",verbose)
+            t = threading.Thread(target=self.__chapter_content, args=(chapter,))
+            threads.append(t)
+            t.start()
+        for t in threads:
+            t.join()
 
+        self._chapters_with_content.sort(key=lambda x: x.number)
+        return self._chapters_with_content
+
+    def genarate_chapters(self) :
+        for chapter in self.chapters:
+            chapter.content
+            yield chapter
+        
 
     def __chapter_content(self, chapter: Chapter) -> List[str]:
         chapter.content
-        self._chapters_with_content.append(chapter)
+        if chapter not in self._chapters_with_content:
+            self._chapters_with_content.append(chapter)
         return chapter.content
+       
 
+    def convert_to_epub(self,loc:str=None,verbose:bool=True,per_thread:int=10) -> None:
+        create_epub(self,loc,verbose,per_thread)
 
     def to_json(self) -> str:
         # withouth chapters

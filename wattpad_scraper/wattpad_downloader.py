@@ -117,7 +117,7 @@ class Wattpad:
                     published=published, isMature=mature, reads=reads, votes=votes, chapters=chapters, total_chapters=parts, tags=tags, status=status)
         return book
 
-    def search_book(self, query: str,limit:int=15) -> List[Book]:
+    def search_books(self, query: str,limit:int=15) -> List[Book]:
         """
         Args:
             query (string): search query
