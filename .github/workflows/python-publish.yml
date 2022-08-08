@@ -128,7 +128,7 @@ jobs:
         password: ${{ secrets.PYPI_API_TOKEN }}
     
   failedPublish:
-    needs : [publish]
+    needs : [test,createTag,publish]
     runs-on: ubuntu-latest
     if: always()
     steps:
