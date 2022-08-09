@@ -117,7 +117,7 @@ class Wattpad:
                     published=published, isMature=mature, reads=reads, votes=votes, chapters=chapters, total_chapters=parts, tags=tags, status=status)
         return book
 
-    def search_books(self, query: str,limit:int=15) -> List[Book]:
+    def search_books(self, query: str,limit:int=15,mature:bool=True,free:bool=True,paid:bool=True,completed:bool=False,show_only_total:bool=False) -> List[Book]:
         """
         Args:
             query (string): search query
@@ -125,15 +125,25 @@ class Wattpad:
         Returns:
             List[Book]: returns a list of Book objects
         """
+        mature_str = "&mature=true" if mature else ""
+        free_str = "&free=1" if free else ""
+        paid_str = "&paid=1" if paid else ""
+        completed_str = "&filter=complete" if completed else ""
+
         parsed_query = quote(query)
-        url = f"https://www.wattpad.com/v4/search/stories?query={parsed_query}&fields=stories(id,title,voteCount,readCount,commentCount,description,completed,mature,cover,url,isPaywalled,length,language(id),user(name),numParts,lastPublishedPart(createDate),promoted,sponsor(name,avatar),tags,tracking(clickUrl,impressionUrl,thirdParty(impressionUrls,clickUrls)),contest(endDate,ctaLabel,ctaURL)),chapters(url),total,tags,nexturl&limit={limit}&mature=true&offset=0"
+        url = f"https://www.wattpad.com/v4/search/stories?query={parsed_query}{completed_str}{mature_str}{free_str}{paid_str}&fields=stories(id,title,voteCount,readCount,commentCount,description,completed,mature,cover,url,isPaywalled,length,language(id),user(name),numParts,lastPublishedPart(createDate),promoted,sponsor(name,avatar),tags,tracking(clickUrl,impressionUrl,thirdParty(impressionUrls,clickUrls)),contest(endDate,ctaLabel,ctaURL)),chapters(url),total,tags,nexturl&limit={limit}&offset=0"
+        # print(url)
         response = get(url)
         json_data = response.json()
-        books = []
-        for book in json_data['stories']:
-            b = Book.from_json(book)
-            books.append(b)
-        return books
+        if not show_only_total:
+            books = []
+            for book in json_data['stories']:
+                b = Book.from_json(book)
+                books.append(b)
+            return books
+        else:
+            total = json_data["total"]
+            return int(total)
 
 
 

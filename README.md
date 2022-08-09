@@ -32,7 +32,7 @@ print(book.chapters[0].title,book.chapters[0].content)
 from wattpad_scraper import Wattpad
 
 wattpad = Wattpad()
-books = wattpad.search_book("harry potter",limit=10)
+books = w.search_books('harry potter by joekih01',completed=True,mature=True,free=True,paid=True,limit=10) 
 print(books[0].chapters[0].content) # on search book chapters have to load first so it may take a while
 print(len(books)) # 10
 ```
