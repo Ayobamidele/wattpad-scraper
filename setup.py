@@ -16,7 +16,7 @@ classifiers = [
 
 setup(
     name='wattpad-scraper',
-    version='0.0.20',
+    version='0.0.21',
     description='Easy to use wattpad scraper',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
