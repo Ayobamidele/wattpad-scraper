@@ -1,7 +1,7 @@
-## [0.0.21]
-Search books by with more options and filters
+## [0.0.23]
+Per thread removed.
 
 ### Features
 - Search books
 - Get book by url
-- Convert books to epub(beta)
+- Convert books to epub

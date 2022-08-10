@@ -18,6 +18,7 @@
 
 import requests
 from fake_headers import Headers
+import atexit
 
 headers = Headers(
     browser='chrome',
@@ -25,11 +26,16 @@ headers = Headers(
     headers=True
 )
 
-header = headers.generate()
 
+headers = headers.generate()
 response_memory = {}
 
+session = requests.Session()
 def get(url):
     if url not in response_memory:
-        response_memory[url] = requests.get(url, headers=header)
+        response_memory[url] = session.get(url,headers=headers)
     return response_memory[url]
+
+def close():
+    session.close()
+atexit.register(close)

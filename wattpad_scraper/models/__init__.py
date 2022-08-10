@@ -40,6 +40,7 @@ class Chapter:
             self._content =  parse_content(self.url)
         return self._content
     
+
     def __str__(self) -> str:
         return f"Chapter(url={self.url}, title={self.title})"
     
@@ -73,9 +74,8 @@ class Chapter:
     def __ge__(self, other) -> bool:
         return self.number >= other.number
         
-        
-
-
+    def __ne__(self, other) -> bool:
+        return self.url != other.url
 
 class Author:
     def __init__(self, url: str, name: str, author_img_url: str = None, books=None) -> None:
@@ -176,48 +176,15 @@ class Book:
 
     @property
     def chapters_with_content(self) -> List[Chapter]:
-        if not self._chapters_with_content:
-            threads = []
-            for chapter in self.chapters:
-                t = threading.Thread(target=self.__chapter_content, args=(chapter,))
-                threads.append(t)
-                t.start()
-            for t in threads:
-                t.join()
-        
-        # sort by chapter number
-        self._chapters_with_content.sort(key=lambda x: x.number)
-        return self._chapters_with_content
-
-    def chapters_with_content_per_thread(self,per_thread:int=None,verbose=False) -> List[Chapter]:
-        if per_thread is None:
-            per_thread = len(self.chapters)
         threads = []
-        total_main_threads = int(self.total_chapters/per_thread)
-        parsed_chapters = []
-        for i in range(total_main_threads):
-            for chapter in self.chapters[per_thread*i:per_thread*(i+1)]:
-                dprint(f"Getting content for chapter {chapter.number}. {chapter.title}",verbose)
-                t = threading.Thread(target=self.__chapter_content, args=(chapter,))
-                parsed_chapters.append(chapter)
-                threads.append(t)
-                t.start()
-            for t in threads:
-                t.join()
-            threads = []
-        
-        # remaining chapters parsed chapters - self.chapters with set
-        remaining_chapters = set(self.chapters) - set(parsed_chapters)
-        for chapter in remaining_chapters:
-            dprint(f"Getting content for chapter {chapter.number}. {chapter.title}",verbose)
-            t = threading.Thread(target=self.__chapter_content, args=(chapter,))
+        for chapter in self.chapters:
+            dprint(f"Getting content for chapter {chapter.number}", verbose=True)
+            t = threading.Thread(target=lambda: chapter.content)
             threads.append(t)
             t.start()
         for t in threads:
             t.join()
-
-        self._chapters_with_content.sort(key=lambda x: x.number)
-        return self._chapters_with_content
+        return self.chapters
 
     def genarate_chapters(self) :
         for chapter in self.chapters:
@@ -225,24 +192,15 @@ class Book:
             yield chapter
         
 
-    def __chapter_content(self, chapter: Chapter) -> List[str]:
-        chapter.content
-        if chapter not in self._chapters_with_content:
-            self._chapters_with_content.append(chapter)
-        return chapter.content
-       
-
-    def convert_to_epub(self,loc:str=None,verbose:bool=True,per_thread:int=None) -> None:
+    def convert_to_epub(self,loc:str=None,verbose:bool=True) -> None:
         """
         Converts the book to epub format
         
         Args:
             loc (string): location to save the epub file default is current directory
             verbose (bool): if true prints the progress of the conversion default is true
-            per_thread (int): number of chapters to be converted per thread default is number of chapters in the book
-
         """
-        create_epub(self,loc,verbose,per_thread)
+        create_epub(self,loc,verbose)
 
     def to_json(self) -> str:
         # withouth chapters

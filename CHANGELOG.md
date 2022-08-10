@@ -59,3 +59,19 @@ Search books by with more options and filters
 - Search books
 - Get book by url
 - Convert books to epub(beta)
+
+## [0.0.22]
+Bug fixex
+
+### Features
+- Search books
+- Get book by url
+- Convert books to epub(beta)
+
+## [0.0.23]
+Per thread removed.
+
+### Features
+- Search books
+- Get book by url
+- Convert books to epub

@@ -8,7 +8,7 @@ def chapter_soups(url : str) -> BeautifulSoup:
     soups = []
     while 1:
         res = get(url + '/page/' + str(page))
-        soup = BeautifulSoup(res.text, "html.parser")
+        soup = BeautifulSoup(res.content, "html.parser")
         next_part = soup.find("div",{"class":["next-up","next-part","orange"]})
         next_part = "next-up next-part orange hidden" in str(next_part)
         soups.append(soup)

@@ -18,7 +18,7 @@ def add_image(url: str, file_name: str, ebook: epub.EpubBook, verbose: bool = Fa
     return img_item
 
 
-def create_epub(book, loc: str = None, verbose: bool = False, per_thread: int = 10) -> None:
+def create_epub(book, loc: str = None, verbose: bool = False) -> None:
     book_id = book.url.split("/")[-1].split("-")[0]
     ebook = epub.EpubBook()
     ebook.set_identifier(book_id)
@@ -42,7 +42,7 @@ def create_epub(book, loc: str = None, verbose: bool = False, per_thread: int = 
     chapters = []
     dprint("Getting chapters", verbose)
     dprint(f"Chapters: {book.total_chapters}", verbose)
-    book_chapters = book.chapters_with_content_per_thread(per_thread, verbose)
+    book_chapters = book.chapters_with_content
     for chapter in book_chapters:
         dprint(
             f"Adding chapter {chapter.number} {chapter.title}({len(chapter)} chars)", verbose)

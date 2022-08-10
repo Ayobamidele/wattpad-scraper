@@ -37,7 +37,7 @@ print(books[0].chapters[0].content) # on search book chapters have to load first
 print(len(books)) # 10
 ```
 
-### Convert Book to Epub (Beta)
+### Convert Book to Epub
 ```python
 from wattpad_scraper import Wattpad as wt
 
@@ -46,7 +46,6 @@ books = w.search_books('harry potter by joekih01')
 book = books[0]
 book.convert_to_epub() # will save book to epub file in current directory
 
-# book.convert_to_epub(per_thread=50) # for faster conversion, if book is large increase per_thread value default is 10
 # book.convert_to_epub(loc='/path/to/save/book/to/epub') # to save book to specific location
 # book.convert_to_epub(verbose=False) # to disable terminal outputs while converting
 
