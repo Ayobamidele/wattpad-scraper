@@ -189,7 +189,9 @@ class Book:
         self._chapters_with_content.sort(key=lambda x: x.number)
         return self._chapters_with_content
 
-    def chapters_with_content_per_thread(self,per_thread:int=10,verbose=False) -> List[Chapter]:
+    def chapters_with_content_per_thread(self,per_thread:int=None,verbose=False) -> List[Chapter]:
+        if per_thread is None:
+            per_thread = len(self.chapters)
         threads = []
         total_main_threads = int(self.total_chapters/per_thread)
         parsed_chapters = []
@@ -230,7 +232,16 @@ class Book:
         return chapter.content
        
 
-    def convert_to_epub(self,loc:str=None,verbose:bool=True,per_thread:int=10) -> None:
+    def convert_to_epub(self,loc:str=None,verbose:bool=True,per_thread:int=None) -> None:
+        """
+        Converts the book to epub format
+        
+        Args:
+            loc (string): location to save the epub file default is current directory
+            verbose (bool): if true prints the progress of the conversion default is true
+            per_thread (int): number of chapters to be converted per thread default is number of chapters in the book
+
+        """
         create_epub(self,loc,verbose,per_thread)
 
     def to_json(self) -> str:
