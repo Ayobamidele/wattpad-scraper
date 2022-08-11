@@ -5,6 +5,19 @@ req_file = 'requirements.txt'
 with open(req_file) as f:
     requirements = f.read().splitlines()
 
+readme_file = 'README.md'
+with open(readme_file) as f:
+    readme = f.read()
+
+changes_log_file = 'CHANGELOG.md'
+with open(changes_log_file) as f:
+    changes_log = f.read()
+
+recent_changes_file = 'RECENTCHANGELOG.md'
+with open(recent_changes_file) as f:
+    recent_changes = f.read()
+
+long_description = readme + '\n\n' +"# RECENT CHANGES\n" + recent_changes + '\n\n' +"# CHANGES LOG\n" + changes_log
 
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -12,13 +25,16 @@ classifiers = [
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
     'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
 ]
 
 setup(
     name='wattpad-scraper',
     version='0.0.22',
     description='Easy to use wattpad scraper',
-    long_description=open('README.md').read(),
+    long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/shhossain/wattpad-scraper',
     author='Shafayat Hossain Shifat',

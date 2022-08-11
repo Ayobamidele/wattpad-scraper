@@ -25,6 +25,9 @@ print(book.author.name, book.author.url)
 print(book.description)
 print(book.chapters)
 print(book.chapters[0].title,book.chapters[0].content)
+
+# Content is a List of strings and image urls.
+
 ```
 
 ### Search Books
@@ -50,5 +53,18 @@ book.convert_to_epub() # will save book to epub file in current directory
 # book.convert_to_epub(verbose=False) # to disable terminal outputs while converting
 
 ```
+
+### Auth System (Beta) [More Features are coming soon]
+```python
+from wattpad_scraper import Wattpad as wt
+
+w = wt("wattpad_username","wattpad_password")
+book= w.search_books("Rules") 
+contents = book.chapters[2].content
+# better search books that are not shown in search results for non logged users.
+# More features are coming soon.
+```
+
+
 
 

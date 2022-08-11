@@ -40,6 +40,13 @@ class Chapter:
             self._content =  parse_content(self.url)
         return self._content
     
+    def parse_content_again(self) -> List[str]:
+        """
+        Parses the content of the chapter again.
+        """
+        self._content = parse_content(self.url)
+        return self._content
+    
 
     def __str__(self) -> str:
         return f"Chapter(url={self.url}, title={self.title})"
@@ -51,7 +58,7 @@ class Chapter:
         return self.url == other.url
     
     def __dir__(self) -> List[str]:
-        return ['url', 'title', 'content']
+        return ['url', 'title', 'content', 'number', 'parse_content_again', 'to_json']
     
     def __len__(self) -> int:
         total_len = 0

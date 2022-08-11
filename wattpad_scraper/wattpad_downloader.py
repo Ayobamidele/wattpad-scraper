@@ -1,13 +1,25 @@
 from typing import List
 from bs4 import BeautifulSoup
-from .models import Author, Book, Chapter, Status
-from .utils import get
+from wattpad_scraper.models import Author, Book, Chapter, Status
+from wattpad_scraper.utils import get
 from urllib.parse import quote
+import os
 
 
 class Wattpad:
-    def __init__(self) -> None:
+    def __init__(self,username=None,password=None) -> None:
+        """
+        Initialize the Wattpad class.
+        
+        Args:
+            username (string)(optional): username or email
+            password (string)(optional): password
+        """
+
         self.main_url = "https://www.wattpad.com"
+        if username is not None and password is not None:
+            os.environ['WATTPAD_USERNAME'] = username
+            os.environ['WATTPAD_PASSWORD'] = password
 
     def get_book_by_url(self, url) -> Book:
         """
