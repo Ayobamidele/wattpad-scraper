@@ -35,7 +35,7 @@ classifiers = [
 
 setup(
     name='wattpad-scraper',
-    version='0.0.25',
+    version='0.0.1',
     description='Get wattpad stories and chapters, and download them as ebook',
     long_description=long_description,
     long_description_content_type='text/markdown',
