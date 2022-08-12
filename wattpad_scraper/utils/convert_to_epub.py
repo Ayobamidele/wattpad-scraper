@@ -1,13 +1,11 @@
 from ebooklib import epub
 from wattpad_scraper.utils.request import get
+from wattpad_scraper.utils.log import Log
 import threading
 from os import path
 import re
 
 
-def dprint(msg: str, verbose=False) -> None:
-    if verbose:
-        print(msg)
 
 
 def add_image(url: str, file_name: str, ebook: epub.EpubBook, verbose: bool = False) -> None:
@@ -18,7 +16,10 @@ def add_image(url: str, file_name: str, ebook: epub.EpubBook, verbose: bool = Fa
     return img_item
 
 
-def create_epub(book, loc: str = None, verbose: bool = False) -> None:
+def create_epub(book, loc: str = None, verbose: bool = True) -> None:
+    log = Log(name="wattpad_convert_epub", verbose=verbose)
+    log.info("To turn off verbose mode, convert_to_epub(verbose=False)")
+
     book_id = book.url.split("/")[-1].split("-")[0]
     ebook = epub.EpubBook()
     ebook.set_identifier(book_id)
@@ -26,26 +27,26 @@ def create_epub(book, loc: str = None, verbose: bool = False) -> None:
     ebook.set_title(book.title)
     ebook.set_language('en')
 
-    dprint(f"Creating epub for {book.title}", verbose)
+    log.print(f"Creating epub for {book.title}",color="green")
     # add cover image
-    dprint("Adding cover image", verbose)
+    log.print("Adding cover image",color="green")
     res = get(book.img_url)
     ebook.set_cover("cover.jpg", content=res.content)
 
     # about page
-    dprint("Adding about page", verbose)
+    log.print("Adding about page",color="green")
     about_page = epub.EpubHtml(
         title='About', file_name='about.xhtml', lang='en')
     about_page.content = f"<h1>{book.title}</h1><p>{book.description}</p>"
     ebook.add_item(about_page)
 
     chapters = []
-    dprint("Getting chapters", verbose)
-    dprint(f"Chapters: {book.total_chapters}", verbose)
+    log.print("Getting chapters",color="green")
+    log.print(f"Chapters: {book.total_chapters}",color="green")
     book_chapters = book.chapters_with_content
     for chapter in book_chapters:
-        dprint(
-            f"Adding chapter {chapter.number} {chapter.title}({len(chapter)} chars)", verbose)
+        log.print(
+            f"Adding chapter {chapter.number} {chapter.title}({len(chapter)} chars)",color="green")
         chapter_obj = epub.EpubHtml(
             title=chapter.title, file_name=f"{chapter.number}.xhtml", lang='en')
         h1tag = f"<h1>{chapter.number}. {chapter.title}</h1>"
@@ -54,7 +55,7 @@ def create_epub(book, loc: str = None, verbose: bool = False) -> None:
         img_no = 1
         for line in chapter.content:
             if ("https://" in line or "http://" in line) and " " not in line:
-                dprint(f"Found image in {chapter.title} ({img_no})", verbose)
+                log.print(f"Found image in {chapter.title} ({img_no})",color="green")
                 file_name = line.split("/")[-2]
                 file_name = f"{chapter.number}-{file_name}.jpeg"
                 t = threading.Thread(target=add_image, args=(
@@ -110,17 +111,16 @@ def create_epub(book, loc: str = None, verbose: bool = False) -> None:
     file_name_pat = re.compile(r'[^a-zA-Z0-9_-]')
     file_name = file_name_pat.sub('', book.title.lower().replace(" ", "_"))
     if loc is None:
-        dprint("Saving epub in current directory", verbose)
+        log.print("Saving epub in current directory",color="green")
         epub.write_epub(file_name + ".epub", ebook, {})
-        dprint("Done", verbose)
     else:
-        dprint(f"Saving epub in {loc}", verbose)
+        log.print(f"Saving epub in {loc}",color="green")
         if not path.exists(loc):
-            dprint(
-                f"Path {loc} does not exist, saving in current directory", verbose)
+            log.print(
+                f"Path {loc} does not exist, saving in current directory",color="green")
             epub.write_epub(file_name + ".epub", ebook, {})
         else:
             if path.isdir(loc):
                 loc = path.join(loc, file_name + ".epub")
         epub.write_epub(loc, ebook, {})
-        dprint("Done", verbose)
+    log.success("Epub created")

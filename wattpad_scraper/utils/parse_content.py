@@ -1,5 +1,6 @@
 from typing import List
 from wattpad_scraper.utils.request import get
+from wattpad_scraper.utils.log import Log
 from bs4 import BeautifulSoup
 
 
@@ -27,9 +28,11 @@ def parse_content(url : str) -> List[str]:
     Returns:
         list: returns a list of content ether a text or a img url
     """
+    log = Log(name="wattpad_log",)
+    log.debug("Parsing {}".format(url))
     soups = chapter_soups(url)
-    # print('len(soups): ' + str(len(soups)))
     contents = []
+    log.info("Got content in {} pages".format(len(soups)))
 
     for soup in soups:
         ptags = soup.select('p[data-p-id]')
@@ -44,4 +47,5 @@ def parse_content(url : str) -> List[str]:
             else:
                 # if p tag don't have img tag, get text
                 contents.append(p.get_text())
+    log.debug("This chapter has {} contents".format(len(contents)))
     return contents

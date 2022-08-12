@@ -1,5 +1,5 @@
-# wattpad-scraper
-Easy to use wattpad scraper
+# Wattpad Scraper | [shhossain](https://github.com/shhossain)
+Get wattpad stories. Download wattpad stories and convert to epub.
 
 ### Important Links
 - [GitHub](https://github.com/shhossain/wattpad-scraper)
@@ -18,6 +18,7 @@ pip install wattpad-scraper
 from wattpad_scraper import Wattpad
 
 wattped = Wattpad()
+# wattpad = Wattpad(verbose=True)  if you want to see output in console
 book_url = "https://www.wattpad.com/story/162756571-bending-the-rules-the-rules-1"
 book = wattped.get_book_by_url(book_url)
 print(book.title) # "Bending the Rules: The Rules 1"

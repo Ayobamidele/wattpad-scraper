@@ -10,7 +10,7 @@
 *.epub
 
 # temp code file
-tempCodeRunnerFile.py
+temp*
 
 # local file
 *loc.py

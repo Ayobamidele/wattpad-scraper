@@ -16,16 +16,39 @@
 #         response_memory[url] = requests.get(url)
 #     return response_memory[url]
 
-import requests
+import httpx
 from fake_headers import Headers
 import atexit
 import os
+import pickle
+
 
 headers = Headers(
     browser='chrome',
     os='Windows',
     headers=True
 )
+temp_dir_path = "temp_catch_delete_if_not_needed"
+if not os.path.exists(temp_dir_path):
+    os.mkdir(temp_dir_path)
+
+res_path = os.path.join(temp_dir_path, "response_memory.pickle")
+session_path = os.path.join(temp_dir_path, "session.pickle")
+
+def store_response():
+    # store response memory in pickle file
+    with open(os.path.join(temp_dir_path, "response_memory.pickle"), "wb") as f:
+        pickle.dump(response_memory, f)
+
+def load_response():
+    # load response memory from pickle file
+    if os.path.exists(res_path):
+        with open(res_path, "rb") as f:
+            response_memory = pickle.load(f)
+    else:
+        response_memory = {}
+    return response_memory
+
 
 def login(username,password):
     login_endpoint  ="https://www.wattpad.com/login?nextUrl=%2Fhome"
@@ -35,12 +58,15 @@ def login(username,password):
     }
     session.post(login_endpoint,data=data,headers=headers)
 
+
+
+
 headers = headers.generate()
-response_memory = {}
+response_memory = load_response()
 
-session = requests.Session()
+
+session = httpx.Client(headers=headers)
 USER_LOGGED_IN = [False]
-
 
 
 def get(url):
@@ -50,9 +76,11 @@ def get(url):
         USER_LOGGED_IN[0] = True
 
     if url not in response_memory:
-        response_memory[url] = session.get(url,headers=headers)
+        response_memory[url] = session.get(url)
     return response_memory[url]
 
 def close():
     session.close()
+    store_response()
+
 atexit.register(close)

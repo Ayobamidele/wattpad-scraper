@@ -1,25 +1,29 @@
 from typing import List
 from bs4 import BeautifulSoup
 from wattpad_scraper.models import Author, Book, Chapter, Status
-from wattpad_scraper.utils import get
+from wattpad_scraper.utils import get,Log
 from urllib.parse import quote
 import os
 
 
 class Wattpad:
-    def __init__(self,username=None,password=None) -> None:
+    def __init__(self,username=None,password=None,verbose=False) -> None:
         """
         Initialize the Wattpad class.
         
         Args:
             username (string)(optional): username or email
             password (string)(optional): password
+            verbose (bool)(optional): verbose mode default False
         """
+        self.verbose = verbose
+        self.log = Log(name="wattpad_log", verbose=verbose)
 
         self.main_url = "https://www.wattpad.com"
         if username is not None and password is not None:
             os.environ['WATTPAD_USERNAME'] = username
             os.environ['WATTPAD_PASSWORD'] = password
+            self.log.print("Logging in as {}".format(username),color="green")
 
     def get_book_by_url(self, url) -> Book:
         """
@@ -45,7 +49,7 @@ class Wattpad:
         """
 
         response = get(url)
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(response.content, "html.parser")
 
         # Get book stats
         stats = soup.find(class_='new-story-stats')
@@ -137,6 +141,7 @@ class Wattpad:
         Returns:
             List[Book]: returns a list of Book objects
         """
+        self.log.debug("Searching for '{}'".format(query),"with options: mature={},free={},paid={},completed={},show_only_total={}".format(mature,free,paid,completed,show_only_total))
         mature_str = "&mature=true" if mature else ""
         free_str = "&free=1" if free else ""
         paid_str = "&paid=1" if paid else ""
@@ -144,18 +149,28 @@ class Wattpad:
 
         parsed_query = quote(query)
         url = f"https://www.wattpad.com/v4/search/stories?query={parsed_query}{completed_str}{mature_str}{free_str}{paid_str}&fields=stories(id,title,voteCount,readCount,commentCount,description,completed,mature,cover,url,isPaywalled,length,language(id),user(name),numParts,lastPublishedPart(createDate),promoted,sponsor(name,avatar),tags,tracking(clickUrl,impressionUrl,thirdParty(impressionUrls,clickUrls)),contest(endDate,ctaLabel,ctaURL)),chapters(url),total,tags,nexturl&limit={limit}&offset=0"
-        # print(url)
         response = get(url)
         json_data = response.json()
         if not show_only_total:
-            books = []
-            for book in json_data['stories']:
-                b = Book.from_json(book)
-                books.append(b)
-            return books
+            try:
+                self.log.info(f"Found {json_data['total']} results")
+                books = []
+                for book in json_data['stories']:
+                    b = Book.from_json(book)
+                    books.append(b)
+                return books
+            except Exception as e:
+                self.log.error(f"[{response.status_code}] {response.text}\nError: {e}")
+                self.log.info(f"if you can't solve this error, please report it to the developer")
+                self.log.info(f"Or submit a bug report at https://github.com/shhossain/wattpad-scraper/issues")
+                return []
         else:
-            total = json_data["total"]
-            return int(total)
+            try:
+                return json_data['total']
+            except Exception as e:
+                self.log.error(f"[{response.status_code}] {response.text}\nError: {e}")
+                self.log.info(f"if you can't solve this error, please report it to the developer")
+                self.log.info(f"Or submit a bug report at https://github.com/shhossain/wattpad-scraper/issues")
 
 
 

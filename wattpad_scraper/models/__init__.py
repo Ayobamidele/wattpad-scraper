@@ -3,6 +3,7 @@ from typing import Dict, List
 from enum import Enum
 from wattpad_scraper.utils.parse_content import parse_content
 from wattpad_scraper.utils.request import get
+from wattpad_scraper.utils.log import Log
 from wattpad_scraper.utils.convert_to_epub import create_epub
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -15,9 +16,7 @@ class Status(Enum):
     HOLD = 4
 
 
-def dprint(msg:str, verbose:bool=False):
-    if verbose:
-        print(msg)
+
 
 class Chapter:
     def __init__(self, url:str, title:str=None, content=None,chapter_number:int=0) -> None:
@@ -122,7 +121,7 @@ def get_chapters(url: str) -> List[Chapter]:
             content (list): list of chapter content
     """
     response = get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(response.content, "html.parser")
     main_url = "https://www.wattpad.com"
 
     toc = soup.find(class_='table-of-contents')
@@ -174,6 +173,9 @@ class Book:
         self.votes = votes
         self.total_chapters = total_chapters
         self._chapters_with_content:List[Chapter] = []
+        self.log = Log("wattpad_log")
+
+        
 
     @property
     def chapters(self) -> List[Chapter]:
@@ -185,7 +187,7 @@ class Book:
     def chapters_with_content(self) -> List[Chapter]:
         threads = []
         for chapter in self.chapters:
-            dprint(f"Getting content for chapter {chapter.number}", verbose=True)
+            self.log.print(f"Getting content for chapter {chapter.number}",color="blue")
             t = threading.Thread(target=lambda: chapter.content)
             threads.append(t)
             t.start()

@@ -1,9 +1,9 @@
-## [0.0.24]
-Auth System (Beta)
+## [0.0.25]
+* Fixed verbose mode. Added system to catch responses so it run faster on sencond run.
 ### Major Changes:
-- Added Auth System
+- Catch responses now run faster.
 ### Minor Changes:
-- Parse book chapters content again if chapter content broken or empty.
+- Added verbose mode.
 
 ### Features
 - Search books
