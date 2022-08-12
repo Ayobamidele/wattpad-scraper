@@ -32,7 +32,7 @@ classifiers = [
 
 setup(
     name='wattpad-scraper',
-    version='0.0.24',
+    version='0.0.25',
     description='Easy to use wattpad scraper',
     long_description=long_description,
     long_description_content_type='text/markdown',
