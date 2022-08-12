@@ -41,7 +41,7 @@ jobs:
         git fetch --tags --all
         previous_version=$(git for-each-ref refs/tags --sort=-taggerdate --format='%(refname)' --count=1 | cut -d/ -f3)
         echo "previous_version: $previous_version"
-        new_version=$(python -c "a = '$previous_version'; b = int(a.split('.')[-1]) if a.split('.')[-1] else 0; c = b + 1; d = '.'.join(a.split('.')[0:-1] + [str(c)]) if c != 1 else '0.0.1'; d = d if 'v' in d else 'v' + d; print(d)")
+        new_version=$(python -c "a = '$previous_version'; b = int(a.split('.')[-1]) if a.split('.')[-1] else 0; c = b + 1; d = '.'.join(a.split('.')[0:-1] + [str(c)]); d = d if 'v' in d else 'v' + d; print(d)")
         echo "new_version: $new_version"
         git tag -a $new_version -m "Version $new_version"
         git push origin $new_version
