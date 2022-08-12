@@ -17,7 +17,7 @@ recent_changes_file = 'RECENTCHANGELOG.md'
 with open(recent_changes_file) as f:
     recent_changes = f.read()
 
-long_description = readme + '\n\n' +"# RECENT CHANGES\n" + recent_changes + '\n\n' +"# CHANGES LOG\n" + changes_log
+long_description = readme + '\n\n' +"# RECENT CHANGES\n" + recent_changes + '\n\n' + changes_log
 
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -28,12 +28,15 @@ classifiers = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Topic :: Software Development :: Libraries :: Web Services',
+    'Topic :: Utilities',
 ]
 
 setup(
     name='wattpad-scraper',
     version='0.0.25',
-    description='Easy to use wattpad scraper',
+    description='Get wattpad stories and chapters, and download them as ebook',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/shhossain/wattpad-scraper',

@@ -1,5 +1,11 @@
-# Wattpad Scraper | [shhossain](https://github.com/shhossain)
-Get wattpad stories. Download wattpad stories and convert to epub.
+# Wattpad Scraper | Wattpad Downloader
+Get wattpad stories, download wattpad stories, convert wattpad stories to ebook (epub/pdf[In Development])
+
+## Major Features
+- Search books 
+- Get book by wattpad url
+- Convert books to epub
+- Login to wattpad
 
 ### Important Links
 - [GitHub](https://github.com/shhossain/wattpad-scraper)
@@ -55,7 +61,7 @@ book.convert_to_epub() # will save book to epub file in current directory
 
 ```
 
-### Auth System (Beta) [More Features are coming soon]
+### Auth System (Beta) (More Features are coming soon)
 ```python
 from wattpad_scraper import Wattpad as wt
 

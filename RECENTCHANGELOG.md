@@ -1,4 +1,4 @@
-## [0.0.25]
+## [0.1.1]
 * Fixed verbose mode. Added system to catch responses so it run faster on sencond run.
 ### Major Changes:
 - Catch responses now run faster.
