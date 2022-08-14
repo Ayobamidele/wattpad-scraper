@@ -1,4 +1,4 @@
-# Wattpad Scraper | Wattpad Downloader
+# Wattpad Scraper(wattpad stories downloader)
 Get wattpad stories, download wattpad stories, convert wattpad stories to ebook (epub/pdf[In Development])
 
 ## Major Features
