@@ -1,12 +1,12 @@
-## [0.1.1]
-* Fixed verbose mode. Added system to catch responses so it run faster on sencond run.
+## [0.0.30]
+* Added Cache loging
 ### Major Changes:
-- Catch responses now run faster.
+- Now you can login with cache.
 ### Minor Changes:
-- Added verbose mode.
+- No changes
 
 ### Features
 - Search books
 - Get book by url
 - Convert books to epub
-- Login to wattpad
+- Login to wattpad (By password/cache)
