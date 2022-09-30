@@ -72,6 +72,15 @@ contents = book.chapters[2].content
 # More features are coming soon.
 ```
 
+#### Cookie authentication
+1. Download an extension called "Cookie - Editor" in your browser.
+2. Open the extension and click Export.
+3. Save copied text in to a file and rename with the `` .json`` extension.
+4. Copy file location
+```python
+from wattpad_scraper import Wattpad as wt
 
-
+w = wt(cookie_file='/home/Desktop/wattpad-cookies.json')
+w.search_books("Rules")
+```
 

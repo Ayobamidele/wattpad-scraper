@@ -7,7 +7,7 @@ import os
 
 
 class Wattpad:
-    def __init__(self,username=None,password=None,verbose=False) -> None:
+    def __init__(self,username=None,password=None,verbose=False,cookie_file=None) -> None:
         """
         Initialize the Wattpad class.
         
@@ -24,6 +24,9 @@ class Wattpad:
             os.environ['WATTPAD_USERNAME'] = username
             os.environ['WATTPAD_PASSWORD'] = password
             self.log.print("Logging in as {}".format(username),color="green")
+        elif cookie_file is not None:
+            os.environ['WATTPAD_COOKIE_FILE'] = cookie_file
+            self.log.print("Logging in with Cookie File {}".format(cookie_file),color="green")
 
     def get_book_by_url(self, url) -> Book:
         """

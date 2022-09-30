@@ -21,6 +21,29 @@ from fake_headers import Headers
 import atexit
 import os
 import pickle
+import json
+
+
+class Cookie():
+    """Parse Cookie File For Request"""
+    def __init__(self, file):
+        super(Cookie, self).__init__()
+        self.file = file
+        self.keys_to_keep  = ['name', 'value', 'domain', 'path']
+
+    
+    def get_cookies_values(self):
+        with open(self.file, 'r') as file:
+            cookie_data = json.load(file)       
+            list_of_cookie_dicts = [{ key: item[key] for key in self.keys_to_keep } for item in cookie_data]
+        return list_of_cookie_dicts
+
+    def jar_cookies(self):
+        cookies = httpx.Cookies()
+        for cookie in self.get_cookies_values():
+            cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'], path=cookie['path'])
+        return cookies.jar
+
 
 
 headers = Headers(
@@ -59,6 +82,17 @@ def login(username,password):
     session.post(login_endpoint,data=data,headers=headers)
 
 
+def cookie_login(file):
+    cookie = Cookie(file)
+    cookie_jar = cookie.jar_cookies()
+    login_endpoint = "https://www.wattpad.com/login"
+    session.cookies.jar = cookie_jar
+    session.follow_redirects = True
+    session.post(login_endpoint,headers=headers)
+
+
+
+
 
 
 headers = headers.generate()
@@ -73,6 +107,8 @@ def get(url):
     if not USER_LOGGED_IN[0]:
         if "WATTPAD_USERNAME" in os.environ and "WATTPAD_PASSWORD" in os.environ:
             login(os.environ['WATTPAD_USERNAME'],os.environ['WATTPAD_PASSWORD'])
+        elif "WATTPAD_COOKIE_FILE" in os.environ:
+            cookie_login(os.environ['WATTPAD_COOKIE_FILE'])
         USER_LOGGED_IN[0] = True
 
     if url not in response_memory:
