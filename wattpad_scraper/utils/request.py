@@ -22,7 +22,8 @@ import atexit
 import os
 import pickle
 import json
-
+import re
+from bs4 import BeautifulSoup
 
 class Cookie():
     """Parse Cookie File For Request"""
@@ -67,6 +68,8 @@ def access_for_authentcated_user(func):
             func(*args, **kwargs)
     return is_authenticated
 
+def error(str):
+    raise ValueError(str)
 
 def store_response():
     # store response memory in pickle file
@@ -134,14 +137,13 @@ def create_reading_list(self, Title):
         return False
 
 
-def authour_book_list(author_username):
+def author_book_list(author_username):
     response = session.get(f"https://www.wattpad.com/v4/users/{author_username}/stories/published?offset=0&limit=102")
-    return len(response.json()['stories'])
+    return response.json()
 
-@access_for_authentcated_user
 def get_reading_list(id=None, title=None, username=None):
     if username == None:
-        username = 'ayobamideleewetuga'
+        username = error("No Access Until Logged In") if not USER_LOGGED_IN[0] else os.environ['WATTPAD_USERNAME']
     response = session.get(f"https://www.wattpad.com/api/v3/users/{username}/lists")
     reading_list = response.json()['lists']
     if title != None or id != None:
