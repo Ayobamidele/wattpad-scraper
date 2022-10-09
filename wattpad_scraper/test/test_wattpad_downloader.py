@@ -1,6 +1,6 @@
 import pytest
 from wattpad_scraper import Wattpad
-from wattpad_scraper.utils.request import author_book_list, get_reading_list
+from wattpad_scraper.utils.reading_list import ReadingList
 
 EXAMPLE_URL = "https://www.wattpad.com/story/48217861-ruins-harry-potter-1"
 EXAMPLE_AUTHOR = "haIfblood"
@@ -23,11 +23,11 @@ class TestWattpadDownloader:
     assert book.author.name == "haIfblood"
 
   def test_get_author_book_list(self):
-    book_list= author_book_list(EXAMPLE_AUTHOR)
+    book_list= ReadingList().author_book_list(EXAMPLE_AUTHOR)
     assert type(book_list) == dict
 
   def test_get_reading_list(self):
-    reading_list = get_reading_list(username=EXAMPLE_AUTHOR)
+    reading_list = ReadingList().get_reading_list(username=EXAMPLE_AUTHOR)
     assert type(reading_list) == list
 
 
