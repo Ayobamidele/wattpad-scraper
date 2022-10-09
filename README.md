@@ -60,17 +60,19 @@ Gets the Books in a reading list
 ```python
 from wattpad_scraper.utils import ReadingList
 
+readingList = ReadingList()
+
 # By default without passsing any arguement it returns all your reading lists 
-ReadingList.get_reading_list()
+readingList.get_reading_list()
 
 #Get your reading list by it's title
-ReadingList.get_reading_list(title="Super Fly")
+readingList.get_reading_list(title="Super Fly")
 
 # Get all users reading list
-ReadingList.get_reading_list(username="Ghost_Lord")
+readingList.get_reading_list(username="Ghost_Lord")
 
 #Get the reading list of a user by their title
-ReadingList.get_reading_list(title="GEMS", username="Ghost_Lord")
+readingList.get_reading_list(title="GEMS", username="Ghost_Lord")
 ```
 
 
@@ -78,7 +80,9 @@ ReadingList.get_reading_list(title="GEMS", username="Ghost_Lord")
 ```python
 from wattpad_scraper.utils import ReadingList
 
-ReadingList.delete_reading_list("Super Fly")
+readingList = ReadingList()
+
+readingList.delete_reading_list("Super Fly")
 ```
 
 
@@ -86,14 +90,18 @@ ReadingList.delete_reading_list("Super Fly")
 ```python
 from wattpad_scraper.utils import ReadingList
 
-ReadingList.add_to_reading_list(urlOfBook="https://www.wattpad.com/story/116064909-around-the-world-in-80-days-completed", titleOfReadingList="Hype")
+readingList = ReadingList()
+
+readingList.add_to_reading_list(urlOfBook="https://www.wattpad.com/story/116064909-around-the-world-in-80-days-completed", titleOfReadingList="Hype")
 ```
 
 ### Get Authors Book List
 ```python
 from wattpad_scraper.utils import ReadingList
 
-ReadingList.author_book_list("amberkbryant")
+readingList = ReadingList()
+
+readingList.author_book_list("amberkbryant")
 
 ```
 
