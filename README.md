@@ -52,7 +52,9 @@ print(len(books)) # 10
 #First login to perform actions on your book list
 from wattpad_scraper.utils import ReadingList
 
-ReadingList.create_reading_list("Super Fly")
+readingList = ReadingList()
+
+readingList.create_reading_list("Super Fly")
 ```
 
 ### Get Users Book List
