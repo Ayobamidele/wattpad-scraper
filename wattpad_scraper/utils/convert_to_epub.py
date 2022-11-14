@@ -66,7 +66,7 @@ def create_epub(book, loc: str = None, verbose: bool = True) -> None:
                 img_no += 1
             else:
                 ptag = f"<p>{line}</p>"
-                content += ptag
+                content += ptag + "<br/>"
         for t in threads:
             t.join()
         chapter_obj.content = content
