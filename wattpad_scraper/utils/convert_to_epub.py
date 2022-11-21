@@ -61,13 +61,13 @@ def create_epub(book, loc: str = None, verbose: bool = True) -> None:
                 t = threading.Thread(target=add_image, args=(
                     line, file_name, ebook, verbose))
                 threads.append(t)
-                t.start()
                 content += f"<img src='images/{file_name}' alt='{file_name}'/><br/>"
                 img_no += 1
             else:
                 ptag = f"<p>{line}</p>"
-                content += ptag + "<br/>"
+                content += ptag
         for t in threads:
+            t.start()
             t.join()
         chapter_obj.content = content
         ebook.add_item(chapter_obj)
