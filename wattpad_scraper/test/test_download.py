@@ -1,7 +1,7 @@
 from wattpad_scraper import Wattpad
 
 
-url = "https://www.wattpad.com/story/228886227-looking-glass-and-the-cube-of-orion-hmk-book-1-%E2%9C%94%EF%B8%8F"
+url = "https://www.wattpad.com/story/304168482-to-the-moon-and-back"
 
 
 class TestDownloader:
@@ -12,3 +12,6 @@ class TestDownloader:
         assert book is not None
     
 
+if __name__ == "__main__":
+    t = TestDownloader()
+    t.test_convert_to_epub()
