@@ -43,6 +43,32 @@ class Cookie:
             cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'], path=cookie['path'])
         return cookies.jar
 
+class User:
+    """Save User Data For Request"""
+    def __init__(self, username=None, password=None, cookie_file=None):
+        super(User, self).__init__()
+        self.username = username
+        self.password = password
+        self.cookie_file = cookie_file
+        self.user_logged_in = False
+
+    def login(self):
+        login_endpoint  ="https://www.wattpad.com/login?nextUrl=%2Fhome"
+        data = {
+            "username": self.username,
+            "password": self.password
+        }
+        session.post(login_endpoint,data=data,headers=headers)
+
+    def cookie_login(self):
+        cookie = Cookie(self.cookie_file)
+        cookie_jar = cookie.jar_cookies()
+        login_endpoint = "https://www.wattpad.com/login"
+        session.cookies.jar = cookie_jar
+        session.follow_redirects = True
+        response = session.post(login_endpoint,headers=headers)
+        data = get_user_details(response.text)
+        self.username = data['username']
 
 
 headers = Headers(
@@ -72,26 +98,7 @@ def load_response():
         response_memory = {}
     return response_memory
 
-def login(username,password):
-    login_endpoint  ="https://www.wattpad.com/login?nextUrl=%2Fhome"
-    data = {
-        "username": username,
-        "password": password
-    }
-    session.post(login_endpoint,data=data,headers=headers)
 
-
-def cookie_login(file):
-    cookie = Cookie(file)
-    cookie_jar = cookie.jar_cookies()
-    login_endpoint = "https://www.wattpad.com/login"
-    session.cookies.jar = cookie_jar
-    session.follow_redirects = True
-    response = session.post(login_endpoint,headers=headers)
-    data = get_user_details(response.text)
-    os.environ['WATTPAD_USERNAME'] = data['username']
-
-os.environ['USER_LOGGED_IN'] = ''
 
 headers = headers.generate()
 response_memory = load_response()
@@ -102,9 +109,9 @@ session = httpx.Client(headers=headers)
 def user_login():
     if not os.environ['USER_LOGGED_IN']:
         if "WATTPAD_USERNAME" in os.environ and "WATTPAD_PASSWORD" in os.environ:
-            login(os.environ['WATTPAD_USERNAME'],os.environ['WATTPAD_PASSWORD'])
+            User.login()
         elif "WATTPAD_COOKIE_FILE" in os.environ:
-            cookie_login(os.environ['WATTPAD_COOKIE_FILE'])
+            User.cookie_login()
         os.environ['USER_LOGGED_IN'] = 'True'
 
 def get(url):
