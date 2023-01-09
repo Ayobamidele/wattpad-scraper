@@ -1,5 +1,7 @@
 # Wattpad Scraper(wattpad stories downloader)
-Get wattpad stories, download wattpad stories, convert wattpad stories to ebook (epub/pdf[In Development])
+[![Downloads](https://static.pepy.tech/personalized-badge/wattpad-scraper?period=total&units=international_system&left_color=black&right_color=blue&left_text=Downloads)](https://pepy.tech/project/wattpad-scraper)
+<br>
+Get wattpad stories, download wattpad stories, convert wattpad stories to ebook (epub/pdf [In Development])
 
 ## Major Features
 - Search books 

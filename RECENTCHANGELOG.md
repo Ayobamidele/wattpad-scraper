@@ -1,9 +1,9 @@
-## [0.0.30]
-* Added Cache loging
+## [0.0.34]
+* New line in every paragraph in convert to epub
 ### Major Changes:
-- Now you can login with cache.
+- Added test for downloading epub
 ### Minor Changes:
-- No changes
+- New line in every paragraph in convert to epub
 
 ### Features
 - Search books
