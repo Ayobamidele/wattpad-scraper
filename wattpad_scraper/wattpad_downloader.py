@@ -4,10 +4,11 @@ from wattpad_scraper.models import Author, Book, Chapter, Status
 from wattpad_scraper.utils import get, Log
 from urllib.parse import quote
 import os
+from wattpad_scraper.utils.reading_list import ReadingList, access_for_authenticated_user, error
 
 
 class Wattpad:
-    def __init__(self,username=None,password=None,verbose=False,cookie_file=None) -> None:
+    def __init__(self, username=None, password=None, verbose=False, cookie_file=None) -> None:
         """
         Initialize the Wattpad class.
         
@@ -23,10 +24,10 @@ class Wattpad:
         if username is not None and password is not None:
             os.environ['WATTPAD_USERNAME'] = username
             os.environ['WATTPAD_PASSWORD'] = password
-            self.log.print("Logging in as {}".format(username),color="green")
+            self.log.print("Logging in as {}".format(username), color="green")
         elif cookie_file is not None:
             os.environ['WATTPAD_COOKIE_FILE'] = cookie_file
-            self.log.print("Logging in with Cookie File {}".format(cookie_file),color="green")
+            self.log.print("Logging in with Cookie File {}".format(cookie_file), color="green")
 
     def get_book_by_url(self, url) -> Book:
         """
@@ -94,13 +95,13 @@ class Wattpad:
         toc = soup.find(class_='table-of-contents')
         lis = toc.find_all('li')
         chapters = []
-        for n,li in enumerate(lis):
+        for n, li in enumerate(lis):
             a = li.find('a')
             url = a.get('href')
             if url.startswith('/'):
                 url = self.main_url + url
             ch = Chapter(
-                url=url, title=a.get_text().strip().replace('\n', ' '), chapter_number=n+1)
+                url=url, title=a.get_text().strip().replace('\n', ' '), chapter_number=n + 1)
             chapters.append(ch)
 
         # Get Title class: "sr-only" > text (title)
@@ -133,10 +134,12 @@ class Wattpad:
 
         # Get Book object
         book = Book(url=url, title=title, author=author, img_url=book_img_url, description=description,
-                    published=published, isMature=mature, reads=reads, votes=votes, chapters=chapters, total_chapters=parts, tags=tags, status=status)
+                    published=published, isMature=mature, reads=reads, votes=votes, chapters=chapters,
+                    total_chapters=parts, tags=tags, status=status)
         return book
 
-    def search_books(self, query: str,limit:int=15,mature:bool=True,free:bool=True,paid:bool=True,completed:bool=False,show_only_total:bool=False) -> List[Book]:
+    def search_books(self, query: str, limit: int = 15, mature: bool = True, free: bool = True, paid: bool = True,
+                     completed: bool = False, show_only_total: bool = False) -> List[Book]:
         """
         Args:
             query (string): search query
@@ -144,7 +147,10 @@ class Wattpad:
         Returns:
             List[Book]: returns a list of Book objects
         """
-        self.log.debug("Searching for '{}'".format(query),"with options: mature={},free={},paid={},completed={},show_only_total={}".format(mature,free,paid,completed,show_only_total))
+        self.log.debug("Searching for '{}'".format(query),
+                       "with options: mature={},free={},paid={},completed={},show_only_total={}".format(mature, free,
+                                                                                                        paid, completed,
+                                                                                                        show_only_total))
         mature_str = "&mature=true" if mature else ""
         free_str = "&free=1" if free else ""
         paid_str = "&paid=1" if paid else ""
@@ -175,11 +181,38 @@ class Wattpad:
                 self.log.info(f"if you can't solve this error, please report it to the developer")
                 self.log.info(f"Or submit a bug report at https://github.com/shhossain/wattpad-scraper/issues")
 
+    @access_for_authenticated_user
+    def create_reading_list(self, title: str) -> bool:
+        request = ReadingList()
+        return request.create_reading_list(title)
 
+    @staticmethod
+    def author_book_list(author_username: str):
+        request = ReadingList()
+        return request.author_book_list(author_username)
 
-        
+    @staticmethod
+    def get_reading_list(id=None, title: str = None, username: str = None):
+        request = ReadingList()
+        if title is None or id is None:
+            if title is not None:
+                return request.get_reading_list(username=username, title=title)
+            elif id is not None:
+                return request.get_reading_list(username=username, id=id)
+            else:
+                return request.get_reading_list(username=username,)
+            # return error("No Search Input!!!")
 
+    @access_for_authenticated_user
+    def delete_reading_list(self, title: str) -> bool:
+        request = ReadingList()
+        return request.delete_reading_list(title)
+
+    @access_for_authenticated_user
+    def add_to_reading_list(self, idOfBook =None, urlOfBook: str = None, titleOfReadingList: str = None, idOfReadingList=None):
+        request = ReadingList()
+        return request.add_to_reading_list(idOfBook, urlOfBook, titleOfReadingList, idOfReadingList)
 
 # if __name__ == "__main__":
-#     wattped = Wattpad()
-#     wattped.search_book('harry potter')
+#     wattpad = Wattpad()
+#     wattpad.search_book('harry potter')
