@@ -13,10 +13,10 @@ def add_image(url: str, file_name: str, ebook: epub.EpubBook, verbose: bool = Fa
     img_item = epub.EpubItem(
         uid=file_name, file_name=f"images/{file_name}", media_type='image/jpeg', content=res.content)
     ebook.add_item(img_item)
-    return img_item
+    return img_item #type: ignore
 
 
-def create_epub(book, loc: str = None, verbose: bool = True) -> None:
+def create_epub(book, loc = None, verbose: bool = True) -> None:
     log = Log(name="wattpad_convert_epub", verbose=verbose)
     log.info("To turn off verbose mode, convert_to_epub(verbose=False)")
 
@@ -77,7 +77,7 @@ def create_epub(book, loc: str = None, verbose: bool = True) -> None:
         ebook.add_item(chapter_obj)
         chapters.append(chapter_obj)
 
-    ebook.toc = tuple(chapters)
+    ebook.toc = tuple(chapters) #type: ignore
     ebook.add_item(epub.EpubNcx())
     ebook.add_item(epub.EpubNav())
 
@@ -106,7 +106,7 @@ def create_epub(book, loc: str = None, verbose: bool = True) -> None:
 
     # add css file
     nav_css = epub.EpubItem(
-        uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
+        uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style) #type: ignore
     ebook.add_item(nav_css)
 
     # create spin, add cover page as first page

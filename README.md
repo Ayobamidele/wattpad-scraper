@@ -124,18 +124,21 @@ book.convert_to_epub() # will save book to epub file in current directory
 
 ```
 
-### Auth System (Beta) (More Features are coming soon)
+## Auth System
+
+## Login with username and password
 ```python
 from wattpad_scraper import Wattpad as wt
 
-w = wt("wattpad_username","wattpad_password")
+w = wt()
+w.login(username="username", password="password")
 book= w.search_books("Rules") 
 contents = book.chapters[2].content
 # better search books that are not shown in search results for non logged users.
 # More features are coming soon.
 ```
 
-#### Cookie authentication
+### Login with cookies
 1. Download an extension called "Cookie - Editor" in your browser.
 2. Open the extension and click Export.
 3. Save copied text in to a file and rename with the `` .json`` extension.
@@ -146,4 +149,62 @@ from wattpad_scraper import Wattpad as wt
 w = wt(cookie_file='/home/Desktop/wattpad-cookies.json')
 w.search_books("Rules")
 ```
+
+
+### Working with reading list
+```python
+from wattpad_scraper import Wattpad as wt
+
+w = wt()
+w.login(username="username", password="password")
+
+# Create a reading list
+reading_list = w.create_reading_list("Super Fly")
+
+# Get a reading list by it's title (For logged in user)
+super_fly = w.get_reading_list("Super Fly")
+
+# Get a reading list by it's id
+super_fly = w.get_reading_list(123456)
+
+# Get a reading list by it's url
+super_fly = w.get_reading_list("https://www.wattpad.com/list/123456-super-fly")
+
+# Get all reading lists of a user
+reading_lists = w.get_user_reading_lists("Ghost_Lord")
+# alternatively you can use id or url of the user
+
+# Add a book to a reading list
+book = w.search_books("Rules")[0]
+w.add_to_reading_list(book, reading_list)
+# alternatively you can use id or url of the book
+w.add_to_reading_list(book.id, reading_list.id)
+w.add_to_reading_list(book.url, reading_list.url)
+
+# You can also add a book to a reading list from the reading list object
+reading_list.add_book(book)
+
+# Remove a book from a reading list
+w.remove_from_reading_list(book, reading_list)
+# alternatively you can use id or url of the book
+w.remove_from_reading_list(book.id, reading_list.id)
+w.remove_from_reading_list(book.url, reading_list.url)
+
+# You can also remove a book from a reading list from the reading list object
+reading_list.remove_book(book)
+
+# Delete a reading list
+w.delete_reading_list(reading_list)
+# alternatively you can use id or url of the reading list
+w.delete_reading_list(reading_list.id)
+w.delete_reading_list(reading_list.url)
+
+# You can also delete a reading list from the reading list object
+reading_list.delete()
+
+# Get all books in a reading list
+books = reading_list.books # returns a list of Book objects
+```
+
+
 

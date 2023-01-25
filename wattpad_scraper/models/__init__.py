@@ -8,6 +8,8 @@ from wattpad_scraper.utils.convert_to_epub import create_epub
 from datetime import datetime
 from bs4 import BeautifulSoup
 import threading
+import re
+import os
 
 
 class Status(Enum):
@@ -18,7 +20,8 @@ class Status(Enum):
 
 
 class Chapter:
-    def __init__(self, url: str, title: str = None, content=None, chapter_number: int = 0) -> None:
+    def __init__(self, url: str, title: str = None, content=None, chapter_number: int = 0) -> None: #type: ignore
+        
         self.url = url
         self.title = title
         self._content = content
@@ -26,7 +29,7 @@ class Chapter:
 
     # to json
     def to_json(self) -> Dict[str, str]:
-        return json.dumps(self.__dict__, indent=4)
+        return json.dumps(self.__dict__, indent=4) #type: ignore
 
     @property
     def content(self) -> List[str]:
@@ -62,8 +65,8 @@ class Chapter:
             total_len += len(content)
         return total_len
 
-    def __hash__(self) -> str:
-        return hash(self.url)
+    def __hash__(self):
+        return hash(self.url) 
 
     def __lt__(self, other) -> bool:
         return self.number < other.number
@@ -80,31 +83,6 @@ class Chapter:
     def __ne__(self, other) -> bool:
         return self.url != other.url
 
-
-class Author:
-    def __init__(self, url: str, name: str, author_img_url: str = None, books=None) -> None:
-        self.url = url
-        self.author_img_url = author_img_url
-        self.name = name
-        self.books = books if books is not None else []
-
-    def to_json(self) -> str:
-        return json.dumps({'url': self.url, 'author_img_url': self.author_img_url, 'name': self.name,
-                           'books': self.books if self.books != None else None}, indent=4)
-
-    def __str__(self) -> str:
-        return f'Author(name={self.name}, url={self.url})'
-
-    def __repr__(self) -> str:
-        return self.__str__()
-
-    def __eq__(self, __o: object) -> bool:
-        if isinstance(__o, Author):
-            return self.url == __o.url
-        return False
-
-    def __len__(self) -> int:
-        return len(self.books)
 
 
 def get_chapters(url: str) -> List[Chapter]:
@@ -125,7 +103,7 @@ def get_chapters(url: str) -> List[Chapter]:
     main_url = "https://www.wattpad.com"
 
     toc = soup.find(class_='table-of-contents')
-    lis = toc.find_all('li')
+    lis = toc.find_all('li') # type: ignore
     chapters = []
     for n, li in enumerate(lis):
         a = li.find('a')
@@ -159,9 +137,7 @@ class Book:
 
     """
 
-    def __init__(self, url: str, title: str, img_url: str, total_chapters: int, description: str, author: Author = None,
-                 tags: List[str] = None, published: str = None, reads: int = None, votes: int = None,
-                 status: Status = Status.ONGOING, isMature: bool = False, chapters: List[Chapter] = None) -> None:
+    def __init__(self, url: str, title: str, img_url: str, total_chapters: int, description: str, author: "Author" = None,tags: List[str] = None, published: str = None, reads: int = None, votes: int = None,status: Status = Status.ONGOING, isMature: bool = False, chapters: List[Chapter] = None): # type: ignore
         self.url = url
         self.title = title
         self.author = author
@@ -176,7 +152,20 @@ class Book:
         self.votes = votes
         self.total_chapters = total_chapters
         self._chapters_with_content: List[Chapter] = []
-        self.log = Log("wattpad_log")
+        self.log = Log("wattpad_log", verbose=os.environ.get("WATTPAD_VERBOSE", "False") == "True")
+        
+        self._id = ""
+
+    @property
+    def id(self) -> str:
+        if self._id != "":
+            return self._id
+        
+        bid = self.url.split('/')[-1]
+        if not bid.isdigit():
+            bid = re.findall(r'\d+', bid)[0]
+        self._id = bid
+        return bid
 
     @property
     def chapters(self) -> List[Chapter]:
@@ -188,7 +177,8 @@ class Book:
     def chapters_with_content(self) -> List[Chapter]:
         threads = []
         for chapter in self.chapters:
-            self.log.print(f"Getting content for chapter {chapter.number}", color="blue")
+            self.log.print(
+                f"Getting content for chapter {chapter.number}", color="blue")
             t = threading.Thread(target=lambda: chapter.content)
             threads.append(t)
             t.start()
@@ -201,10 +191,10 @@ class Book:
             chapter.content
             yield chapter
 
-    def convert_to_epub(self, loc: str = None, verbose: bool = True) -> None:
+    def convert_to_epub(self, loc = None, verbose: bool = True) -> None:
         """
         Converts the book to epub format
-        
+
         Args:
             loc (string): location to save the epub file default is current directory
             verbose (bool): if true prints the progress of the conversion default is true
@@ -238,27 +228,98 @@ class Book:
 
     # from json
     @classmethod
-    def from_json(cls, json_str: str) -> 'Book':
-        json_str = json.loads(json_str) if isinstance(json_str, str) else json_str
+    def from_json(cls, jsonstr: str) -> 'Book':
+        json_str = json.loads(jsonstr) if isinstance(
+            jsonstr, str) else jsonstr
+        
         title = json_str['title']
         url = json_str['url']
         img_url = json_str['cover']
         description = json_str['description']
         author_name = json_str['user']['name']
         author_url = f"https://www.wattpad.com/user/{author_name}"
-        author = Author(name=author_name, url=author_url)
+        author_avatar = json_str['user'].get('avatar', "")
+        author_fullname = json_str['user'].get('fullName', "")
+        
+        author = Author(username=author_name, url=author_url, fullname=author_fullname, author_img_url=author_avatar)
         tags = json_str['tags']
         status = Status.COMPLETED if json_str['completed'] else Status.ONGOING
         isMature = json_str['mature']
-        published = json_str['lastPublishedPart']['createDate']
-        published = datetime.strptime(published, '%Y-%m-%d %H:%M:%S')
-        published = published.strftime('%d/%m/%Y')
+
+        if 'lastPublishedPart' in json_str:
+            published = json_str['lastPublishedPart']['createDate']
+        else:
+            published = json_str['firstPublishedPart']['createDate']
+            
+        # 2016-04-04T19:21:55Z
+        published = published.replace('T', ' ')
+        published = published.replace('Z', '')
+
+        try:
+            published = datetime.strptime(published, '%Y-%m-%d %H:%M:%S')
+            published = published.strftime('%d/%m/%Y')
+        except Exception as e:
+            published = "N/A"
+        
         reads = json_str['readCount']
         votes = json_str['voteCount']
         total_chapters = json_str['numParts']
         return cls(url=url, title=title, img_url=img_url, description=description, author=author, tags=tags,
                    status=status, isMature=isMature, published=published, reads=reads, votes=votes,
                    total_chapters=total_chapters)
+
+class Author:
+    def __init__(self, url: str, username: str,fullname:str="", author_img_url: str = "", books: List['Book'] = []) -> None:
+        self.url = url
+        self.author_img_url = author_img_url
+        self.name = username
+        self.fullname = fullname
+        self._books = books if books is not None else []
+
+    @property
+    def cover(self) -> str:
+        return self.author_img_url
+    
+    def to_json(self) -> str:
+        return json.dumps({'url': self.url, 'author_img_url': self.author_img_url, 'name': self.name,'books': self.books if self.books != None else None}, indent=4)
+    
+    @property
+    def books(self) -> List['Book']:
+        if not self._books:
+            return self.book_list
+        else:
+            return self._books
+    
+    @property
+    def book_list(self) -> List['Book']:
+        if not self._books:
+            res = get(f"https://www.wattpad.com/v4/users/{self.name}/stories/published?offset=0&limit=102")
+            data = res.json()
+            
+            stories = data['stories']
+            books = []
+            for story in stories:
+                book = Book.from_json(story)
+                books.append(book)
+            self._books = books
+        
+            return books
+        else:
+            return self._books   
+
+    def __str__(self) -> str:
+        return f'Author(name={self.name}, url={self.url})'
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __eq__(self, __o: object) -> bool:
+        if isinstance(__o, Author):
+            return self.url == __o.url
+        return False
+
+    def __len__(self) -> int:
+        return len(self.books)
 
 #     {
 #   "id": "80033537",
