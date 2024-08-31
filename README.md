@@ -3,9 +3,6 @@
 <br>
 Get wattpad stories, download wattpad stories, convert wattpad stories to ebook (epub/pdf [In Development])
 
-## Announcement!!!
-I'm thrilled to announce that the package is now under my fresh and dynamic new ownership! Exciting changes are on the horizon as I embark on a journey of development and innovation. I'm currently working on an experimental web extension that mirrors the capabilities of the package. Stay tuned for a blend of professionalism and friendliness in my upcoming updates. I can't wait to bring you along on this exciting adventure!
-
 
 ## Major Features
 - Search books 
